@@ -1,0 +1,161 @@
+/* Sprint 2: shared controls, modal, calendar views, event detail, dashboard agenda. */
+
+/* ---------- Shared controls ---------- */
+.input,
+.field textarea,
+.note-add textarea,
+.note textarea {
+  font: inherit; padding: 0.5rem 0.7rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+}
+.field textarea, .note textarea, .note-add textarea { resize: vertical; width: 100%; }
+.input:focus, textarea:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+.btn-danger {
+  font: inherit; font-weight: 600; padding: 0.6rem 1rem; border: 0; border-radius: 8px;
+  background: var(--danger); color: #fff; cursor: pointer;
+}
+.danger { color: var(--danger) !important; }
+.small { font-size: 0.85rem; }
+.spacer { flex: 1; }
+.pre-wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+.row-tight { display: flex; gap: 0.5rem; }
+.row-tight input { flex: 1; min-width: 0; }
+.check-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.icon-btn { font-size: 1.5rem; line-height: 1; border: 0; background: none; color: var(--muted); cursor: pointer; padding: 0 0.25rem; }
+.btn-group { display: inline-flex; }
+.btn-group .btn-ghost:first-child { border-radius: 8px 0 0 8px; }
+.btn-group .btn-ghost:last-child { border-radius: 0 8px 8px 0; border-left: 0; }
+.segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.segmented button { font: inherit; padding: 0.45rem 0.85rem; border: 0; background: var(--surface); color: var(--text); cursor: pointer; }
+.segmented button + button { border-left: 1px solid var(--border); }
+.segmented button.active { background: var(--primary); color: #fff; }
+
+/* ---------- Modal ---------- */
+.modal { border: 0; padding: 0; background: transparent; color: var(--text); max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); }
+.modal::backdrop { background: rgb(0 0 0 / 0.45); }
+.modal-md { width: 640px; }
+.modal-sm { width: 420px; }
+.modal-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); }
+.modal-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem; }
+.modal-header h2 { font-size: 1.15rem; overflow-wrap: anywhere; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+.event-form { margin-top: 0.5rem; }
+.event-form .form-actions { gap: 0.5rem; }
+
+/* ---------- Category / status colours ---------- */
+.cat-work { --c: var(--cat-work); }
+.cat-personal { --c: var(--cat-personal); }
+.cat-meeting { --c: var(--cat-meeting); }
+.cat-health { --c: var(--cat-health); }
+.cat-study { --c: var(--cat-study); }
+.cat-other { --c: var(--cat-other); }
+.tag-cat { color: var(--c); border-color: currentColor; }
+.status-tag.status-completed { color: var(--success); border-color: currentColor; }
+.status-tag.status-cancelled { color: var(--muted); }
+.dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--c); flex: none; }
+
+/* ---------- Calendar ---------- */
+.calendar-page { display: grid; gap: 0.75rem; }
+.cal-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; }
+.cal-title { font-size: 1.25rem; }
+.cal-filters input[type="search"] { flex: 1 1 220px; }
+.cal-card { padding: 0; overflow: hidden; }
+
+.chip {
+  display: flex; align-items: center; gap: 0.3rem; width: 100%; min-width: 0; text-align: left;
+  font: inherit; font-size: 0.78rem; line-height: 1.3; padding: 0.1rem 0.35rem; border-radius: 4px; cursor: pointer;
+  border: 0; border-left: 3px solid var(--c);
+  background: color-mix(in srgb, var(--c) 16%, var(--surface)); color: var(--text);
+}
+.chip:hover { background: color-mix(in srgb, var(--c) 26%, var(--surface)); }
+.chip-time { font-variant-numeric: tabular-nums; color: var(--muted); flex: none; }
+.chip-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.chip.status-completed, .tg-event.status-completed { opacity: 0.6; }
+.status-completed .chip-title::before { content: "✓ "; }
+.status-cancelled .chip-title { text-decoration: line-through; }
+.chip.status-cancelled, .tg-event.status-cancelled { opacity: 0.5; }
+
+.month-head, .month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.month-weekday { padding: 0.5rem; font-size: 0.8rem; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); }
+.month-cell {
+  min-height: 112px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 0.25rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.15rem; min-width: 0;
+}
+.month-cell:nth-child(7n) { border-right: 0; }
+.month-cell:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
+.month-cell.outside { background: var(--bg); }
+.month-cell.outside .day-num { color: var(--muted); }
+.day-num {
+  align-self: flex-start; font: inherit; font-size: 0.85rem; font-weight: 600; border: 0; background: none;
+  color: var(--text); cursor: pointer; width: 1.8rem; height: 1.8rem; border-radius: 50%;
+}
+.day-num:hover { background: var(--border); }
+.month-cell.today .day-num { background: var(--primary); color: #fff; }
+.month-events { display: grid; gap: 0.15rem; min-width: 0; }
+.more-link { font: inherit; font-size: 0.75rem; border: 0; background: none; color: var(--muted); text-align: left; cursor: pointer; padding: 0 0.35rem; }
+.more-link:hover { color: var(--primary); }
+
+.timegrid { --gutter: 56px; display: grid; }
+.timegrid.days-7 { --days: 7; }
+.timegrid.days-1 { --days: 1; }
+.tg-head, .tg-allday {
+  display: grid; grid-template-columns: var(--gutter) repeat(var(--days), minmax(0, 1fr));
+  border-bottom: 1px solid var(--border);
+}
+.tg-gutter { font-size: 0.7rem; color: var(--muted); padding: 0.25rem; text-align: right; align-self: center; }
+.tg-dayhead {
+  font: inherit; border: 0; background: none; color: var(--text); cursor: pointer; padding: 0.4rem;
+  display: grid; justify-items: center; font-size: 0.8rem;
+}
+.tg-dayhead:disabled { cursor: default; }
+.tg-dayhead strong { font-size: 1.2rem; width: 2.2rem; height: 2.2rem; display: grid; place-items: center; border-radius: 50%; }
+.tg-dayhead.today strong { background: var(--primary); color: #fff; }
+.tg-allday-cell { border-left: 1px solid var(--border); padding: 0.2rem; min-height: 1.9rem; display: grid; gap: 0.15rem; align-content: start; cursor: pointer; min-width: 0; }
+.tg-body {
+  display: grid; grid-template-columns: var(--gutter) repeat(var(--days), minmax(0, 1fr));
+  max-height: 62vh; overflow-y: auto; position: relative;
+}
+.tg-hour-label { height: var(--hour); font-size: 0.7rem; color: var(--muted); text-align: right; padding-right: 0.4rem; transform: translateY(-0.5em); }
+.tg-col { position: relative; border-left: 1px solid var(--border); min-width: 0; }
+.tg-slot { height: var(--hour); border-bottom: 1px solid var(--border); cursor: pointer; }
+.tg-slot:hover { background: color-mix(in srgb, var(--primary) 6%, transparent); }
+.tg-event {
+  position: absolute; flex-direction: column; align-items: stretch; justify-content: flex-start;
+  overflow: hidden; z-index: 1; box-shadow: 0 0 0 1px var(--surface);
+}
+.tg-event .chip-title { white-space: normal; }
+.now-line { position: absolute; left: 0; right: 0; height: 2px; background: var(--danger); z-index: 2; pointer-events: none; }
+.now-line::before { content: ""; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--danger); }
+
+/* ---------- Event detail ---------- */
+.event-detail { display: grid; gap: 1rem; }
+.detail-list { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1rem; margin: 0; }
+.detail-list dt { color: var(--muted); font-size: 0.9rem; }
+.detail-list dd { margin: 0; }
+.notes h3 { font-size: 0.95rem; margin: 0 0 0.5rem; }
+.note-list { list-style: none; margin: 0 0 0.75rem; padding: 0; display: grid; gap: 0.5rem; }
+.note { border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.75rem; display: grid; gap: 0.4rem; }
+.note p { margin: 0; }
+.note-meta { gap: 0.75rem; }
+.note-meta .btn-link { font-size: 0.85rem; }
+.note-add { display: flex; gap: 0.5rem; align-items: flex-end; }
+
+/* ---------- Dashboard agenda ---------- */
+.today-card { grid-column: span 2; }
+.agenda { list-style: none; margin: 0.75rem 0 0; padding: 0; display: grid; gap: 0.25rem; }
+.agenda a { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.5rem; border-radius: 6px; color: var(--text); text-decoration: none; }
+.agenda a:hover { background: var(--bg); }
+.agenda-time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.85rem; min-width: 3.6rem; }
+.agenda-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agenda .status-cancelled .agenda-title { text-decoration: line-through; color: var(--muted); }
+
+@media (max-width: 768px) {
+  .today-card { grid-column: auto; }
+  .month-cell { min-height: 72px; }
+  .month-cell .chip-time { display: none; }
+  .timegrid { --gutter: 40px; }
+  .timegrid.days-7 .tg-event .chip-time { display: none; }
+  .check-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cal-title { font-size: 1.05rem; }
+  .modal-panel { padding: 1rem; }
+}
