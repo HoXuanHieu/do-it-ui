@@ -22,6 +22,10 @@ jobs:
     env:
       # Project pages are served from https://<user>.github.io/<repo>/
       BASE_PATH: /${{ github.event.repository.name }}/
+      # GitHub Pages cannot run the API: calls to /api/* on github.io return 405.
+      # Set repo variable API_BASE_URL (Settings → Secrets and variables → Actions → Variables)
+      # to the deployed backend origin, e.g. https://doit-api.example.com
+      VITE_API_BASE_URL: ${{ vars.API_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
