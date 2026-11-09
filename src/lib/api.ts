@@ -34,6 +34,12 @@ export interface AuthResponse {
   user: UserDto
 }
 
+// API origin. Empty = same origin (local dev via the Vite proxy). On GitHub Pages, which only serves
+// static files, VITE_API_BASE_URL must point to the deployed backend (e.g. https://api.example.com).
+const API_BASE = `${(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')}/api/v1`
+// Cross-origin calls need 'include' so the httpOnly refresh cookie is sent/stored.
+const CREDENTIALS: RequestCredentials = 'include'
+
 let accessToken: string | null = null
 let refreshInFlight: Promise<AuthResponse | null> | null = null
 const listeners = new Set<(auth: AuthResponse | null) => void>()
@@ -62,7 +68,7 @@ async function parseError(res: Response): Promise<ApiError> {
 export function refreshSession(): Promise<AuthResponse | null> {
   refreshInFlight ??= (async () => {
     try {
-      const res = await fetch('/api/v1/auth/refresh', { method: 'POST', credentials: 'same-origin' })
+      const res = await fetch(`${API_BASE}/auth/refresh`, { method: 'POST', credentials: CREDENTIALS })
       if (!res.ok) {
         setSession(null)
         return null
@@ -87,10 +93,10 @@ async function request(path: string, init: ApiInit, retry: boolean): Promise<Res
   if (init.json !== undefined) headers.set('Content-Type', 'application/json')
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
 
-  const res = await fetch(`/api/v1${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers,
-    credentials: 'same-origin',
+    credentials: CREDENTIALS,
     body: init.json !== undefined ? JSON.stringify(init.json) : init.body,
   })
 
