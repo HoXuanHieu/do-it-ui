@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { authApi, onAuthChange, refreshSession, setSession, type UserDto } from '../../lib/api'
+import { onAuthChange, refreshSession, setSession, type UserDto } from '../../lib/api'
+import { authApi } from './api'
 
 type Status = 'loading' | 'authenticated' | 'anonymous'
 

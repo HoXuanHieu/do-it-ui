@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { EventSummaryDto } from '../../lib/api'
+import type { EventSummaryDto } from './api'
 import { addDays, formatTime, isSameDay, overlapsDay, startOfMonth, startOfWeek, weekdayName } from '../../lib/dates'
 import { eventsOnDay, layoutDay } from './layout'
 import { categoryClass } from './meta'

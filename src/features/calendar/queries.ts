@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { eventsApi, type EventDetailDto, type EventFilters, type EventInput, type EventStatus } from '../../lib/api'
+import { eventsApi, type EventDetailDto, type EventFilters, type EventInput, type EventStatus } from './api'
 
 export const eventKeys = {
   all: ['events'] as const,

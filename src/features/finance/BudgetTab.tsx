@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { ApiError } from '../../lib/api'
-import type { BudgetLineDto, BudgetOverviewDto } from '../../lib/financeApi'
+import type { BudgetLineDto, BudgetOverviewDto } from './api'
 import { applyServerErrors } from '../../lib/forms'
 import { formatAmountInput, formatMoney, parseAmount } from '../../lib/money'
 import { AmountInput, MonthSwitcher, ProgressBar } from './components'

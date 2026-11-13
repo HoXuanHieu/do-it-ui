@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import type { EventCategory, EventDetailDto, EventFilters, EventStatus } from '../../lib/api'
+import type { EventCategory, EventDetailDto, EventFilters, EventStatus } from './api'
 import { addDays, addMonths, formatDate, monthTitle, parseDateKey, startOfDay, startOfMonth, startOfWeek, toDateKey } from '../../lib/dates'
 import { usePreferences } from '../account/queries'
 import { MonthView, TimeGridView, type CalendarView } from './CalendarViews'

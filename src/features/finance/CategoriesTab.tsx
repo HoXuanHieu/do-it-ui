@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
-import type { CategoryDto, TransactionType } from '../../lib/financeApi'
+import type { CategoryDto, TransactionType } from './api'
 import { applyServerErrors } from '../../lib/forms'
 import { ColorSwatchPicker } from './components'
 import { useCategories, useDeleteCategory, useRestoreCategory, useSaveCategory } from './queries'

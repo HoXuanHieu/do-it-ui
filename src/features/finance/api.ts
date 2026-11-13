@@ -1,4 +1,4 @@
-import { api, type Paged } from './api'
+import { api, type Paged } from '../../lib/api'
 
 // ---------- Finance module (SRS §4.5) ----------
 

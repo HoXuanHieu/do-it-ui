@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { financeApi, type BudgetInput, type TransactionFilters, type TransactionInput } from '../../lib/financeApi'
+import { financeApi, type BudgetInput, type TransactionFilters, type TransactionInput } from './api'
 import { toDateKey } from '../../lib/dates'
+import { notificationKeys } from '../notifications/queries'
 
 export const financeKeys = {
   all: ['finance'] as const,
@@ -58,7 +59,7 @@ function useFinanceMutation<TArgs, TResult>(fn: (args: TArgs) => Promise<TResult
     mutationFn: fn,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: financeKeys.all })
-      void qc.invalidateQueries({ queryKey: ['notifications'] })
+      void qc.invalidateQueries({ queryKey: notificationKeys.all })
     },
   })
 }
