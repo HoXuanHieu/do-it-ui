@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
 import { toDateKey } from '../../lib/dates'
-import type { CategoryDto, TransactionDto, TransactionType } from './api'
+import { JARS, type CategoryDto, type Jar, type TransactionDto, type TransactionType } from './api'
 import { applyServerErrors } from '../../lib/forms'
 import { formatAmountInput, parseAmount } from '../../lib/money'
 import { AmountInput } from './components'
@@ -18,13 +18,14 @@ export type TransactionDialogMode =
 /** Largest amount safely representable as a JS number with 2 decimals (backend allows more). */
 const MAX = 9_999_999_999_999
 
-function makeSchema(currency: string) {
+function makeSchema(currency: string, jarMode: boolean) {
   return z
     .object({
       type: z.enum(['Income', 'Expense']),
       amount: z.string(),
       categoryId: z.string().min(1, 'Chọn danh mục'),
       date: z.string().min(1, 'Chọn ngày'),
+      jar: z.string(),
       description: z.string().max(500, 'Tối đa 500 ký tự'),
       note: z.string().max(2000, 'Tối đa 2000 ký tự'),
     })
@@ -33,6 +34,7 @@ function makeSchema(currency: string) {
       // BR-FI-001
       if (n == null || n <= 0 || n > MAX)
         ctx.addIssue({ code: 'custom', path: ['amount'], message: 'Nhập số tiền lớn hơn 0 (tối đa 2 chữ số thập phân)' })
+      if (jarMode && v.type === 'Expense' && !v.jar) ctx.addIssue({ code: 'custom', path: ['jar'], message: 'Chọn hũ' })
     })
 }
 
@@ -41,10 +43,12 @@ type FormValues = z.infer<ReturnType<typeof makeSchema>>
 export function TransactionDialog({
   mode,
   currency,
+  jarMode,
   onClose,
 }: {
   mode: TransactionDialogMode | null
   currency: string
+  jarMode: boolean
   onClose: () => void
 }) {
   const title =
@@ -56,6 +60,7 @@ export function TransactionDialog({
           key={mode.kind === 'edit' ? mode.tx.id : `${mode.type}-${mode.date ?? ''}`}
           mode={mode}
           currency={mode.kind === 'edit' ? mode.tx.currencyCode : currency}
+          jarMode={jarMode}
           onClose={onClose}
         />
       )}
@@ -63,7 +68,7 @@ export function TransactionDialog({
   )
 }
 
-function TransactionForm({ mode, currency, onClose }: { mode: TransactionDialogMode; currency: string; onClose: () => void }) {
+function TransactionForm({ mode, currency, jarMode, onClose }: { mode: TransactionDialogMode; currency: string; jarMode: boolean; onClose: () => void }) {
   const { data: categories = [] } = useCategories(true)
   const save = useSaveTransaction()
   const remove = useDeleteTransaction()
@@ -78,13 +83,14 @@ function TransactionForm({ mode, currency, onClose }: { mode: TransactionDialogM
           amount: formatAmountInput(mode.tx.amount, currency),
           categoryId: mode.tx.categoryId,
           date: mode.tx.date,
+          jar: mode.tx.jar ?? '',
           description: mode.tx.description ?? '',
           note: mode.tx.note ?? '',
         }
-      : { type: mode.type, amount: '', categoryId: '', date: mode.date ?? todayKey, description: '', note: '' }
+      : { type: mode.type, amount: '', categoryId: '', date: mode.date ?? todayKey, jar: '', description: '', note: '' }
 
   const { register, handleSubmit, setError, setValue, control, formState } = useForm<FormValues>({
-    resolver: zodResolver(makeSchema(currency)),
+    resolver: zodResolver(makeSchema(currency, jarMode)),
     defaultValues: initial,
   })
   const type = useWatch({ control, name: 'type' })
@@ -102,6 +108,8 @@ function TransactionForm({ mode, currency, onClose }: { mode: TransactionDialogM
           amount: parseAmount(v.amount, currency)!,
           categoryId: v.categoryId,
           date: v.date,
+          // Sent even outside jar mode so editing there keeps the jar already assigned.
+          jar: v.type === 'Expense' ? (v.jar as Jar) || null : null,
           description: v.description.trim() || null,
           note: v.note.trim() || null,
         },
@@ -153,6 +161,17 @@ function TransactionForm({ mode, currency, onClose }: { mode: TransactionDialogM
       <Field label="Mô tả" error={formState.errors.description?.message}>
         <input maxLength={500} placeholder="VD: Ăn trưa, Grab…" {...register('description')} />
       </Field>
+
+      {jarMode && type === 'Expense' && (
+        <Field label="Hũ" error={formState.errors.jar?.message}>
+          <select {...register('jar')}>
+            <option value="">— Chọn hũ —</option>
+            {Object.entries(JARS).map(([value, j]) => (
+              <option key={value} value={value}>{j.label}</option>
+            ))}
+          </select>
+        </Field>
+      )}
 
       <div className="field span-all">
         <span>Ghi chú</span>
