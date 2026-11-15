@@ -4,6 +4,27 @@ import { api, type Paged } from '../../lib/api'
 
 export type TransactionType = 'Income' | 'Expense'
 
+export type Jar = 'Necessities' | 'LongTermSavings' | 'Education' | 'Play' | 'FinancialFreedom' | 'Give'
+
+export const JARS: Record<Jar, { label: string; color: string }> = {
+  Necessities: { label: 'Thiết yếu', color: '#1971c2' },
+  LongTermSavings: { label: 'Tiết kiệm dài hạn', color: '#2f9e44' },
+  Education: { label: 'Giáo dục', color: '#1098ad' },
+  Play: { label: 'Hưởng thụ', color: '#9c36b5' },
+  FinancialFreedom: { label: 'Tự do tài chính', color: '#f08c00' },
+  Give: { label: 'Cho đi', color: '#c2255c' },
+}
+
+export interface JarOverviewDto {
+  month: string
+  enabled: boolean
+  currencyCode: string
+  income: number
+  jars: { jar: Jar; percent: number; allocated: number; spent: number; remaining: number }[]
+  unassignedCount: number
+  unassignedSpent: number
+}
+
 export interface CategoryDto {
   id: string
   name: string
@@ -26,6 +47,7 @@ export interface TransactionDto {
   note: string | null
   createdAt: string
   updatedAt: string
+  jar: Jar | null
 }
 
 export interface TransactionInput {
@@ -35,6 +57,7 @@ export interface TransactionInput {
   date: string
   description: string | null
   note: string | null
+  jar: Jar | null
 }
 
 export interface TransactionFilters {
@@ -116,4 +139,8 @@ export const financeApi = {
   saveBudget: (month: string, body: BudgetInput) => api<BudgetOverviewDto>(`/finance/budgets/${month}`, { method: 'PUT', json: body }),
   deleteBudget: (month: string) => api<void>(`/finance/budgets/${month}`, { method: 'DELETE' }),
   copyBudget: (month: string) => api<BudgetOverviewDto>(`/finance/budgets/${month}/copy-from-previous`, { method: 'POST' }),
+
+  jars: (month: string) => api<JarOverviewDto>(`/finance/jars/${month}`),
+  setJarMode: (enabled: boolean) => api<void>('/finance/jars/mode', { method: 'PUT', json: { enabled } }),
+  syncJars: (month: string) => api<JarOverviewDto>(`/finance/jars/${month}/sync`, { method: 'POST' }),
 }

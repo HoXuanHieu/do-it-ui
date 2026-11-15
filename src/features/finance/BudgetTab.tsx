@@ -110,7 +110,7 @@ function BudgetOverview({ budget }: { budget: BudgetOverviewDto }) {
   )
 }
 
-function BudgetLine({ line, currency, thresholds, big }: { line: BudgetLineDto; currency: string; thresholds: number[]; big?: boolean }) {
+export function BudgetLine({ line, currency, thresholds, big }: { line: BudgetLineDto; currency: string; thresholds: number[]; big?: boolean }) {
   const over = line.remaining < 0
   return (
     <div className={big ? 'budget-line big' : 'budget-line'}>

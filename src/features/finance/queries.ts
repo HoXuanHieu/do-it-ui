@@ -9,6 +9,7 @@ export const financeKeys = {
   transactions: (f: TransactionFilters) => ['finance', 'transactions', f] as const,
   summary: (from: string, to: string) => ['finance', 'summary', from, to] as const,
   budget: (month: string) => ['finance', 'budget', month] as const,
+  jars: (month: string) => ['finance', 'jars', month] as const,
 }
 
 // ---------- Month helpers ("yyyy-MM") ----------
@@ -50,6 +51,9 @@ export const useSummary = (from: string, to: string) =>
 export const useBudget = (month: string) =>
   useQuery({ queryKey: financeKeys.budget(month), queryFn: () => financeApi.budget(month), placeholderData: keepPreviousData })
 
+export const useJars = (month: string) =>
+  useQuery({ queryKey: financeKeys.jars(month), queryFn: () => financeApi.jars(month), placeholderData: keepPreviousData })
+
 // ---------- Mutations ----------
 
 /** Any finance write can move totals, budgets and (budget-alert) notifications: refresh them all. */
@@ -84,3 +88,6 @@ export const useSaveBudget = () =>
   useFinanceMutation(({ month, body }: { month: string; body: BudgetInput }) => financeApi.saveBudget(month, body))
 export const useDeleteBudget = () => useFinanceMutation((month: string) => financeApi.deleteBudget(month))
 export const useCopyBudget = () => useFinanceMutation((month: string) => financeApi.copyBudget(month))
+
+export const useSetJarMode = () => useFinanceMutation((enabled: boolean) => financeApi.setJarMode(enabled))
+export const useSyncJars = () => useFinanceMutation((month: string) => financeApi.syncJars(month))
