@@ -3,7 +3,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { AuthProvider } from '../features/auth/AuthContext'
 import { ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage } from '../features/auth/AuthPages'
 import { AppLayout } from '../layouts/AppLayout'
-import { ComingSoonPage, DashboardPage, NotFoundPage } from '../pages/Pages'
+import { DashboardPage } from '../features/dashboard/DashboardPage'
+import { ComingSoonPage, NotFoundPage } from '../pages/Pages'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },

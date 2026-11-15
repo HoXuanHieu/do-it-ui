@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Field } from '../../components/Form'
 import { applyServerErrors, PASSWORD_HINT } from '../../lib/forms'
-import { authApi } from '../../lib/api'
+import { authApi } from './api'
 import { useAuth } from './AuthContext'
 import {
   forgotPasswordSchema,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { formatDate, parseDateKey, weekdayName } from '../../lib/dates'
-import type { TransactionDto, TransactionType } from '../../lib/financeApi'
+import type { TransactionDto, TransactionType } from './api'
 import { formatMoney, parseAmount } from '../../lib/money'
 import { usePreferences } from '../account/queries'
 import { MonthSwitcher } from './components'

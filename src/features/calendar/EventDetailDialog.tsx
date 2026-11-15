@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
-import { ApiError, type EventDetailDto, type EventNoteDto, type EventStatus } from '../../lib/api'
+import { ApiError } from '../../lib/api'
+import type { EventDetailDto, EventNoteDto, EventStatus } from './api'
 import { addDays, formatDate, formatTime, isSameDay, weekdayName } from '../../lib/dates'
 import { usePreferences } from '../account/queries'
 import { CATEGORY_LABEL, categoryClass, reminderLabel, STATUS_LABEL } from './meta'

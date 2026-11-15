@@ -1,4 +1,4 @@
-import type { EventCategory, EventStatus } from '../../lib/api'
+import type { EventCategory, EventStatus } from './api'
 
 export const CATEGORIES: { value: EventCategory; label: string }[] = [
   { value: 'Work', label: 'Công việc' },
