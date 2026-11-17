@@ -183,6 +183,8 @@ form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
 
 @media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }
+  /* iOS Safari zooms the page when a focused input is under 16px. */
+  .field input, .field select { font-size: 16px; }
   .row-between { flex-direction: column; align-items: flex-start; }
   .avatar-card { flex-direction: column; align-items: flex-start; }
 }

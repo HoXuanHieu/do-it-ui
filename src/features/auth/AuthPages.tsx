@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Field } from '../../components/Form'
+import { ApiError } from '../../lib/api'
 import { applyServerErrors, PASSWORD_HINT } from '../../lib/forms'
 import { authApi } from './api'
 import { useAuth } from './AuthContext'
@@ -46,7 +47,9 @@ export function LoginPage() {
       const from = (location.state as { from?: string } | null)?.from ?? '/'
       navigate(from, { replace: true })
     } catch (e) {
-      setFormError(applyServerErrors(e, setError))
+      // Email existence is checked first server-side, so 401 here means wrong password.
+      if (e instanceof ApiError && e.status === 401) setError('password', { message: 'Mật khẩu không đúng.' })
+      else setFormError(applyServerErrors(e, setError))
     }
   })
 

@@ -21,6 +21,7 @@ export function applyServerErrors<T extends FieldValues>(err: unknown, setError?
 // Server messages are English (API contract); map the common ones for the Vietnamese UI.
 const MESSAGES: Record<string, string> = {
   'Email is already registered.': 'Email đã được đăng ký.',
+  'No account found with this email.': 'Email chưa được đăng ký. Vui lòng kiểm tra lại email hoặc đăng ký tài khoản mới.',
   'Current password is incorrect.': 'Mật khẩu hiện tại không đúng.',
   'The reset link is invalid or has expired.': 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.',
   'Only JPEG, PNG or WebP images are allowed.': 'Chỉ chấp nhận ảnh JPEG, PNG hoặc WebP.',
