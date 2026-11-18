@@ -129,6 +129,8 @@ function TransactionForm({ mode, currency, jarMode, onClose }: { mode: Transacti
             type="button"
             role="radio"
             aria-checked={type === t}
+            // Income/expense is fixed once created; only other fields are editable.
+            disabled={mode.kind === 'edit'}
             className={type === t ? `active ${t === 'Income' ? 'income' : 'expense'}` : undefined}
             onClick={() => {
               setValue('type', t)
