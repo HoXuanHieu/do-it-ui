@@ -71,7 +71,7 @@ a { color: var(--primary); }
 
 /* Forms */
 form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
-.field { display: grid; gap: 0.3rem; font-size: 0.9rem; font-weight: 500; }
+.field { display: grid; gap: 0.3rem; align-content: start; font-size: 0.9rem; font-weight: 500; }
 .field input,
 .field select {
   font: inherit; padding: 0.6rem 0.75rem; border-radius: 8px;
@@ -79,6 +79,10 @@ form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
 }
 .field select:focus,
 .field input:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+.password-input { position: relative; display: grid; }
+.password-input input { padding-right: 2.5rem; }
+.password-toggle { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); display: flex; padding: 0.25rem; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.password-toggle:hover { color: var(--text); }
 .field-error, .form-error { color: var(--danger); font-weight: 400; }
 .form-error { margin: 0; font-size: 0.9rem; }
 .btn-primary {
@@ -101,7 +105,7 @@ form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
 .auth-card h1 { margin-top: 1rem; }
 
 /* Shell */
-.shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; }
 .sidebar {
   display: flex; flex-direction: column; gap: 1.5rem; padding: 1.25rem;
   background: var(--surface); border-right: 1px solid var(--border);
@@ -122,7 +126,7 @@ form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
 }
 
 @media (max-width: 768px) {
-  .shell { grid-template-columns: 1fr; }
+  .shell { grid-template-columns: minmax(0, 1fr); }
   .sidebar { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0.75rem; border-right: 0; border-bottom: 1px solid var(--border); }
   .sidebar nav { display: flex; overflow-x: auto; width: 100%; order: 3; }
   .sidebar nav a { white-space: nowrap; }
@@ -167,6 +171,7 @@ form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
   font-weight: 700; line-height: 1.4rem; text-align: center; background: var(--danger); color: #fff;
 }
 .sidebar nav a { display: flex; align-items: center; gap: 0.5rem; }
+.sidebar nav svg { flex-shrink: 0; }
 .list-card { padding: 0; overflow: hidden; }
 .pad { padding: 1.25rem; margin: 0; }
 .notif-list { list-style: none; margin: 0; padding: 0; }
