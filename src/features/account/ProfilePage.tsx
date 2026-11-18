@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Field } from '../../components/Form'
 import { applyServerErrors } from '../../lib/forms'
-import { profileApi, type Gender, type ProfileDto } from '../../lib/api'
+import { profileApi, type Gender, type ProfileDto } from './api'
 import { useAuth } from '../auth/AuthContext'
 import { useAvatarUrl, useProfile, useSetProfile } from './queries'
 

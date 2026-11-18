@@ -1,5 +1,5 @@
 import { forwardRef, useState, type InputHTMLAttributes } from 'react'
-import { formatAmountInput, parseAmount } from '../../lib/money'
+import { formatAmountInput, formatAmountTyping, parseAmount } from '../../lib/money'
 import { monthKeyOf, monthLabel, shiftMonth } from './queries'
 
 /** ‹ Tháng 11/2026 › with a native month picker. */
@@ -35,11 +35,11 @@ export function MonthSwitcher({ value, onChange }: { value: string; onChange: (m
 }
 
 /**
- * Text input for money: accepts "1.250.000", "1250000", "12,5"; reformats on blur.
+ * Text input for money: shows thousand separators while typing ("1,250,000"); reformats on blur.
  * The form value is the raw string; parse with parseAmount on submit.
  */
 export const AmountInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { currency: string }>(
-  function AmountInput({ currency, onBlur, ...props }, ref) {
+  function AmountInput({ currency, onBlur, onChange, ...props }, ref) {
     return (
       <div className="amount-input">
         <input
@@ -47,6 +47,19 @@ export const AmountInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTML
           inputMode="decimal"
           autoComplete="off"
           {...props}
+          onChange={(e) => {
+            const el = e.target
+            const formatted = formatAmountTyping(el.value, currency)
+            if (formatted !== el.value) {
+              // Keep the caret after the same number of digits it was after before regrouping.
+              const keep = el.value.slice(0, el.selectionStart ?? el.value.length).replace(/[^\d.]/g, '').length
+              let pos = 0
+              for (let seen = 0; pos < formatted.length && seen < keep; pos++) if (formatted[pos] !== ',') seen++
+              el.value = formatted
+              el.setSelectionRange(pos, pos)
+            }
+            onChange?.(e)
+          }}
           onBlur={(e) => {
             const el = e.target
             const n = parseAmount(el.value, currency)

@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
-import { notificationsApi, type NotificationDto, type NotificationType } from '../../lib/api'
-import { keys, useUnreadCount } from '../account/queries'
+import { Link } from 'react-router-dom'
+import { notificationsApi, type NotificationDto, type NotificationType } from './api'
+import { notificationKeys } from './queries'
 
 const PAGE_SIZE = 20
 
@@ -26,22 +26,6 @@ function relativeTime(iso: string, now: number) {
   return new Date(iso).toLocaleDateString('vi-VN')
 }
 
-/** Sidebar link with unread badge. */
-export function NotificationsNavLink() {
-  const { data } = useUnreadCount()
-  const count = data?.count ?? 0
-  return (
-    <NavLink to="/notifications" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-      Thông báo
-      {count > 0 && (
-        <span className="badge" aria-label={`${count} chưa đọc`}>
-          {count > 99 ? '99+' : count}
-        </span>
-      )}
-    </NavLink>
-  )
-}
-
 /** FR-SH-003: notification inbox. */
 export function NotificationsPage() {
   const qc = useQueryClient()
@@ -50,12 +34,12 @@ export function NotificationsPage() {
   const [now] = useState(() => Date.now())
 
   const list = useQuery({
-    queryKey: [...keys.notifications, { unreadOnly, page }],
+    queryKey: [...notificationKeys.all, { unreadOnly, page }],
     queryFn: () => notificationsApi.list({ unreadOnly, page, pageSize: PAGE_SIZE }),
     placeholderData: (prev) => prev,
   })
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: keys.notifications })
+  const invalidate = () => qc.invalidateQueries({ queryKey: notificationKeys.all })
   const markRead = useMutation({ mutationFn: notificationsApi.markRead, onSuccess: invalidate })
   const markAll = useMutation({ mutationFn: notificationsApi.markAllRead, onSuccess: invalidate })
 

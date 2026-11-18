@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { formatDate, parseDateKey, weekdayName } from '../../lib/dates'
-import type { TransactionDto, TransactionType } from '../../lib/financeApi'
-import { formatMoney, parseAmount } from '../../lib/money'
+import { JARS, type TransactionDto, type TransactionType } from './api'
+import { formatAmountTyping, formatMoney, parseAmount } from '../../lib/money'
 import { usePreferences } from '../account/queries'
 import { MonthSwitcher } from './components'
 import { monthRange, useCategories, useSummary, useTransactions } from './queries'
@@ -19,7 +19,7 @@ function useDebounced<T>(value: T, ms: number) {
 }
 
 /** FR-FI-001..006, 008: monthly transaction history with summary, filters and search. */
-export function TransactionsTab({ month, onMonthChange }: { month: string; onMonthChange: (m: string) => void }) {
+export function TransactionsTab({ month, jarMode, onMonthChange }: { month: string; jarMode: boolean; onMonthChange: (m: string) => void }) {
   const prefs = usePreferences().data
   const currency = prefs?.currency ?? 'VND'
   const dateFormat = prefs?.dateFormat
@@ -77,7 +77,7 @@ export function TransactionsTab({ month, onMonthChange }: { month: string; onMon
         <Stat label="Tổng thu" value={s ? formatMoney(s.income, s.currencyCode) : '…'} tone="income" />
         <Stat label="Tổng chi" value={s ? formatMoney(s.expense, s.currencyCode) : '…'} tone="expense" />
         <Stat label="Chênh lệch" value={s ? formatMoney(s.net, s.currencyCode, { signed: true }) : '…'} tone={s && s.net < 0 ? 'expense' : 'income'} />
-        <Stat label="Tỷ lệ tiết kiệm" value={s ? (s.savingsRate == null ? '—' : `${s.savingsRate.toLocaleString('vi-VN')}%`) : '…'} />
+        <Stat label="Tỷ lệ tiết kiệm" value={s ? (s.savingsRate == null ? '—' : `${s.savingsRate.toLocaleString('en-US')}%`) : '…'} />
       </div>
 
       {/* FR-FI-006 / FR-FI-008 */}
@@ -96,9 +96,9 @@ export function TransactionsTab({ month, onMonthChange }: { month: string; onMon
           ))}
         </select>
         <input className="input amount-filter" inputMode="decimal" placeholder="Từ số tiền" value={minRaw}
-          onChange={(e) => setMinRaw(e.target.value)} aria-label="Số tiền tối thiểu" />
+          onChange={(e) => setMinRaw(formatAmountTyping(e.target.value, currency))} aria-label="Số tiền tối thiểu" />
         <input className="input amount-filter" inputMode="decimal" placeholder="Đến số tiền" value={maxRaw}
-          onChange={(e) => setMaxRaw(e.target.value)} aria-label="Số tiền tối đa" />
+          onChange={(e) => setMaxRaw(formatAmountTyping(e.target.value, currency))} aria-label="Số tiền tối đa" />
         {filtered && (
           <button className="btn-link" onClick={() => { setType(''); setCategoryId(''); setSearch(''); setMinRaw(''); setMaxRaw('') }}>
             Xóa bộ lọc
@@ -139,7 +139,13 @@ export function TransactionsTab({ month, onMonthChange }: { month: string; onMon
                       </span>
                       <span className="tx-main">
                         <strong>{t.description || t.categoryName}</strong>
-                        <small className="muted">{t.description ? t.categoryName : ''}{t.note ? `${t.description ? ' · ' : ''}${t.note}` : ''}</small>
+                        <small className="muted">
+                          {[
+                            t.description && t.categoryName,
+                            jarMode && t.type === 'Expense' && (t.jar ? `Hũ ${JARS[t.jar].label}` : 'Chưa xếp hũ'),
+                            t.note,
+                          ].filter(Boolean).join(' · ')}
+                        </small>
                       </span>
                       <span className={`tx-amount ${t.type === 'Income' ? 'amount-income' : 'amount-expense'}`}>
                         {formatMoney(t.type === 'Income' ? t.amount : -t.amount, t.currencyCode, { signed: true })}
@@ -161,7 +167,7 @@ export function TransactionsTab({ month, onMonthChange }: { month: string; onMon
         </nav>
       )}
 
-      <TransactionDialog mode={dialog} currency={currency} onClose={() => setDialog(null)} />
+      <TransactionDialog mode={dialog} currency={currency} jarMode={jarMode} onClose={() => setDialog(null)} />
     </div>
   )
 }

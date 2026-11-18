@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { ApiError } from '../../lib/api'
-import type { BudgetLineDto, BudgetOverviewDto } from '../../lib/financeApi'
+import type { BudgetLineDto, BudgetOverviewDto } from './api'
 import { applyServerErrors } from '../../lib/forms'
 import { formatAmountInput, formatMoney, parseAmount } from '../../lib/money'
 import { AmountInput, MonthSwitcher, ProgressBar } from './components'
@@ -110,7 +110,7 @@ function BudgetOverview({ budget }: { budget: BudgetOverviewDto }) {
   )
 }
 
-function BudgetLine({ line, currency, thresholds, big }: { line: BudgetLineDto; currency: string; thresholds: number[]; big?: boolean }) {
+export function BudgetLine({ line, currency, thresholds, big }: { line: BudgetLineDto; currency: string; thresholds: number[]; big?: boolean }) {
   const over = line.remaining < 0
   return (
     <div className={big ? 'budget-line big' : 'budget-line'}>
@@ -120,7 +120,7 @@ function BudgetLine({ line, currency, thresholds, big }: { line: BudgetLineDto; 
           <strong>{line.name}</strong>
           {line.isArchived && <small className="muted">(đã lưu trữ)</small>}
         </span>
-        <span className={over ? 'amount-expense' : undefined}>{line.percent.toLocaleString('vi-VN')}%</span>
+        <span className={over ? 'amount-expense' : undefined}>{line.percent.toLocaleString('en-US')}%</span>
       </div>
       <ProgressBar percent={line.percent} thresholds={thresholds} />
       <div className="row-between small">
@@ -176,7 +176,7 @@ function BudgetForm({ month, budget, onDone }: { month: string; budget: BudgetOv
     <form onSubmit={submit} noValidate className="budget-form">
       <label className="field">
         <span>Tổng hạn mức tháng (để trống nếu chỉ đặt theo danh mục)</span>
-        <AmountInput currency={currency} value={total} onChange={(e) => setTotal(e.target.value)} placeholder="VD: 10.000.000" autoFocus />
+        <AmountInput currency={currency} value={total} onChange={(e) => setTotal(e.target.value)} placeholder="VD: 10,000,000" autoFocus />
       </label>
 
       <fieldset className="fieldset">

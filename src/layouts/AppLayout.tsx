@@ -1,7 +1,7 @@
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAvatarUrl, useProfile, useThemeSync } from '../features/account/queries'
 import { useAuth } from '../features/auth/AuthContext'
-import { NotificationsNavLink } from '../features/notifications/NotificationsPage'
+import { NotificationsNavLink } from '../features/notifications/NotificationsNavLink'
 
 const NAV = [
   { to: '/', label: 'Tổng quan', end: true },
