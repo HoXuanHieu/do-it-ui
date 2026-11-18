@@ -1,14 +1,15 @@
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavIcon, type NavIconName } from '../components/NavIcon'
 import { useAvatarUrl, useProfile, useThemeSync } from '../features/account/queries'
 import { useAuth } from '../features/auth/AuthContext'
 import { NotificationsNavLink } from '../features/notifications/NotificationsNavLink'
 
-const NAV = [
-  { to: '/', label: 'Tổng quan', end: true },
-  { to: '/calendar', label: 'Lịch & Sự kiện' },
-  { to: '/health', label: 'Sức khỏe' },
-  { to: '/finance', label: 'Tài chính' },
-  { to: '/goals', label: 'Mục tiêu' },
+const NAV: { to: string; label: string; icon: NavIconName; end?: boolean }[] = [
+  { to: '/', label: 'Tổng quan', icon: 'home', end: true },
+  { to: '/calendar', label: 'Lịch & Sự kiện', icon: 'calendar' },
+  { to: '/health', label: 'Sức khỏe', icon: 'health' },
+  { to: '/finance', label: 'Tài chính', icon: 'finance' },
+  { to: '/goals', label: 'Mục tiêu', icon: 'goals' },
 ]
 
 /** Authenticated shell: guards routes and renders the module navigation. */
@@ -36,11 +37,13 @@ function Shell() {
         <nav>
           {NAV.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => (isActive ? 'active' : undefined)}>
+              <NavIcon name={n.icon} />
               {n.label}
             </NavLink>
           ))}
           <NotificationsNavLink />
           <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+            <NavIcon name="settings" />
             Cài đặt
           </NavLink>
         </nav>
