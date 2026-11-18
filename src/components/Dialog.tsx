@@ -20,7 +20,11 @@ export function Modal({
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    if (open && !el.open) el.showModal()
+    if (open && !el.open) {
+      el.showModal()
+      // showModal() focuses the close button; React's autoFocus is not an HTML attribute, so re-apply it.
+      el.querySelector<HTMLElement>('form input:not([type=hidden]), form textarea, form select')?.focus()
+    }
     if (!open && el.open) el.close()
   }, [open])
 

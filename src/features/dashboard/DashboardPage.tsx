@@ -10,6 +10,8 @@ import { ProgressBar } from '../finance/components'
 import { monthKeyOf, monthRange, useBudget, useSummary } from '../finance/queries'
 import { addDays, formatTime, startOfDay, toDateKey } from '../../lib/dates'
 import { formatMoney } from '../../lib/money'
+import { activeByUrgency, daysLeft, nextStep, progressOf, useGoals } from '../goals/queries'
+import { ProgressRing } from '../goals/widgets'
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -26,7 +28,8 @@ export function DashboardPage() {
         <TodaySchedule day={today} />
         <FinanceToday day={today} />
         <MonthBudget day={today} />
-        {(['Sức khỏe hôm nay', 'Mục tiêu'] as const).map((k) => (
+        <GoalsToday />
+        {(['Sức khỏe hôm nay'] as const).map((k) => (
           <section key={k} className="card">
             <h2>{t(k)}</h2>
             <p className="muted">{t('Chưa có dữ liệu.')}</p>
@@ -129,6 +132,48 @@ function MonthBudget({ day }: { day: Date }) {
           </dl>
         </div>
       )}
+    </section>
+  )
+}
+
+/** Keeps the most urgent active goals in sight every time the app opens. */
+function GoalsToday() {
+  const { data, isPending, isError } = useGoals()
+  const goals = data ? activeByUrgency(data).slice(0, 3) : []
+  return (
+    <section className="card dash-goals">
+      <div className="row-between">
+        <h2>{t('Mục tiêu')}</h2>
+        <Link to="/goals" className="small">
+          {t('Xem tất cả →')}
+        </Link>
+      </div>
+      {isPending && <p className="muted">{t('Đang tải…')}</p>}
+      {isError && <p className="form-error">{t('Không tải được mục tiêu.')}</p>}
+      {data && goals.length === 0 && (
+        <p className="muted">
+          {t('Chưa có mục tiêu đang thực hiện.')} <Link to="/goals">{t('Tạo ngay')}</Link>
+        </p>
+      )}
+      <ul>
+        {goals.map((g) => {
+          const d = daysLeft(g)
+          return (
+            <li key={g.id} className={`period-${g.period.toLowerCase()}`}>
+              <Link to={`/goals/${g.id}`}>
+                <ProgressRing percent={progressOf(g)} size={44} />
+                <span className="grow">
+                  <strong>{g.title}</strong>
+                  <small>
+                    {d < 0 ? t('Quá hạn {n} ngày', { n: -d }) : d === 0 ? t('Hạn hôm nay') : t('Còn {n} ngày', { n: d })}
+                    {nextStep(g) && ` · ➜ ${nextStep(g)!.title}`}
+                  </small>
+                </span>
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
     </section>
   )
 }

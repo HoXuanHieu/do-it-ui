@@ -24,7 +24,8 @@ const router = createBrowserRouter([
       { path: 'calendar', lazy: async () => ({ Component: (await import('../features/calendar/CalendarPage')).CalendarPage }) },
       { path: 'health', element: <ComingSoonPage title="Sức khỏe" /> },
       { path: 'finance', lazy: async () => ({ Component: (await import('../features/finance/FinancePage')).FinancePage }) },
-      { path: 'goals', element: <ComingSoonPage title="Mục tiêu" /> },
+      { path: 'goals', lazy: async () => ({ Component: (await import('../features/goals/GoalsPage')).GoalsPage }) },
+      { path: 'goals/:id', lazy: async () => ({ Component: (await import('../features/goals/GoalDetailPage')).GoalDetailPage }) },
       { path: 'profile', lazy: async () => ({ Component: (await import('../features/account/ProfilePage')).ProfilePage }) },
       { path: 'settings', lazy: async () => ({ Component: (await import('../features/account/SettingsPage')).SettingsPage }) },
       {

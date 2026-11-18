@@ -5,6 +5,7 @@ import { initLanguage } from './i18n'
 import './index.css'
 import './styles/calendar.css'
 import './styles/finance.css'
+import './styles/goals.css'
 
 await initLanguage()
 
