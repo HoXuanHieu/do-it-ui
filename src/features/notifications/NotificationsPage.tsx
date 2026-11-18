@@ -1,3 +1,4 @@
+import { locale, t, type Key } from '../../i18n'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -6,7 +7,7 @@ import { notificationKeys } from './queries'
 
 const PAGE_SIZE = 20
 
-const TYPE_LABEL: Record<NotificationType, string> = {
+const TYPE_LABEL: Record<NotificationType, Key> = {
   System: 'Hệ thống',
   Security: 'Bảo mật',
   EventReminder: 'Nhắc lịch',
@@ -14,16 +15,15 @@ const TYPE_LABEL: Record<NotificationType, string> = {
   BudgetAlert: 'Ngân sách',
 }
 
-const rtf = new Intl.RelativeTimeFormat('vi', { numeric: 'auto' })
-
 function relativeTime(iso: string, now: number) {
+  const rtf = new Intl.RelativeTimeFormat(locale(), { numeric: 'auto' })
   const diffSec = Math.round((new Date(iso).getTime() - now) / 1000)
   const abs = Math.abs(diffSec)
   if (abs < 60) return rtf.format(diffSec, 'second')
   if (abs < 3600) return rtf.format(Math.round(diffSec / 60), 'minute')
   if (abs < 86400) return rtf.format(Math.round(diffSec / 3600), 'hour')
   if (abs < 86400 * 7) return rtf.format(Math.round(diffSec / 86400), 'day')
-  return new Date(iso).toLocaleDateString('vi-VN')
+  return new Date(iso).toLocaleDateString(locale())
 }
 
 /** FR-SH-003: notification inbox. */
@@ -49,8 +49,8 @@ export function NotificationsPage() {
     <>
       <header className="page-header row-between">
         <div>
-          <h1>Thông báo</h1>
-          <p className="muted">Lưu trong 90 ngày.</p>
+          <h1>{t('Thông báo')}</h1>
+          <p className="muted">{t('Lưu trong 90 ngày.')}</p>
         </div>
         <div className="row">
           <label className="check">
@@ -62,18 +62,18 @@ export function NotificationsPage() {
                 setPage(1)
               }}
             />
-            Chỉ chưa đọc
+            {t('Chỉ chưa đọc')}
           </label>
           <button className="btn-ghost" disabled={markAll.isPending} onClick={() => markAll.mutate()}>
-            Đánh dấu tất cả đã đọc
+            {t('Đánh dấu tất cả đã đọc')}
           </button>
         </div>
       </header>
 
       <section className="card list-card">
-        {list.isPending && <p className="muted pad">Đang tải…</p>}
-        {list.isError && <p className="form-error pad">Không tải được thông báo.</p>}
-        {list.data?.items.length === 0 && <p className="muted pad">Không có thông báo nào.</p>}
+        {list.isPending && <p className="muted pad">{t('Đang tải…')}</p>}
+        {list.isError && <p className="form-error pad">{t('Không tải được thông báo.')}</p>}
+        {list.data?.items.length === 0 && <p className="muted pad">{t('Không có thông báo nào.')}</p>}
         <ul className="notif-list">
           {list.data?.items.map((n) => (
             <NotificationItem key={n.id} n={n} now={now} onRead={() => markRead.mutate(n.id)} />
@@ -82,15 +82,15 @@ export function NotificationsPage() {
       </section>
 
       {totalPages > 1 && (
-        <nav className="pager" aria-label="Phân trang">
+        <nav className="pager" aria-label={t('Phân trang')}>
           <button className="btn-ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            ← Trước
+            {t('← Trước')}
           </button>
           <span className="muted">
-            Trang {page}/{totalPages}
+            {t('Trang {page}/{total}', { page, total: totalPages })}
           </span>
           <button className="btn-ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-            Sau →
+            {t('Sau →')}
           </button>
         </nav>
       )}
@@ -103,9 +103,9 @@ function NotificationItem({ n, now, onRead }: { n: NotificationDto; now: number;
   return (
     <li className={unread ? 'notif unread' : 'notif'}>
       <div className="notif-head">
-        <span className={`tag tag-${n.type.toLowerCase()}`}>{TYPE_LABEL[n.type]}</span>
+        <span className={`tag tag-${n.type.toLowerCase()}`}>{t(TYPE_LABEL[n.type])}</span>
         <strong>{n.title}</strong>
-        <time className="muted" dateTime={n.createdAt} title={new Date(n.createdAt).toLocaleString('vi-VN')}>
+        <time className="muted" dateTime={n.createdAt} title={new Date(n.createdAt).toLocaleString(locale())}>
           {relativeTime(n.createdAt, now)}
         </time>
       </div>
@@ -113,12 +113,12 @@ function NotificationItem({ n, now, onRead }: { n: NotificationDto; now: number;
       <div className="row">
         {n.link && (
           <Link to={n.link} onClick={unread ? onRead : undefined}>
-            Xem chi tiết
+            {t('Xem chi tiết')}
           </Link>
         )}
         {unread && (
           <button className="btn-link" onClick={onRead}>
-            Đánh dấu đã đọc
+            {t('Đánh dấu đã đọc')}
           </button>
         )}
       </div>

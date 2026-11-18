@@ -1,3 +1,4 @@
+import { t } from '../../i18n'
 import { NavIcon } from '../../components/NavIcon'
 import { NavLink } from 'react-router-dom'
 import { useUnreadCount } from './queries'
@@ -9,9 +10,9 @@ export function NotificationsNavLink() {
   return (
     <NavLink to="/notifications" className={({ isActive }) => (isActive ? 'active' : undefined)}>
       <NavIcon name="bell" />
-      Thông báo
+      {t('Thông báo')}
       {count > 0 && (
-        <span className="badge" aria-label={`${count} chưa đọc`}>
+        <span className="badge" aria-label={t('{count} chưa đọc', { count })}>
           {count > 99 ? '99+' : count}
         </span>
       )}

@@ -1,3 +1,4 @@
+import type { Key } from '../../i18n'
 import { api, type Paged } from '../../lib/api'
 
 // ---------- Finance module (SRS §4.5) ----------
@@ -6,7 +7,7 @@ export type TransactionType = 'Income' | 'Expense'
 
 export type Jar = 'Necessities' | 'LongTermSavings' | 'Education' | 'Play' | 'FinancialFreedom' | 'Give'
 
-export const JARS: Record<Jar, { label: string; color: string }> = {
+export const JARS: Record<Jar, { label: Key; color: string }> = {
   Necessities: { label: 'Thiết yếu', color: '#1971c2' },
   LongTermSavings: { label: 'Tiết kiệm dài hạn', color: '#2f9e44' },
   Education: { label: 'Giáo dục', color: '#1098ad' },

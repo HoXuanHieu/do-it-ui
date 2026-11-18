@@ -1,3 +1,4 @@
+import { t } from '../../../i18n'
 import { useState, type ReactNode } from 'react'
 import { useForm, type UseFormReturn } from 'react-hook-form'
 import { applyServerErrors } from '../../../lib/forms'
@@ -14,7 +15,7 @@ export function PreferencesCard({ title, children }: { title: string; children: 
   if (!prefs.data || !options.data)
     return (
       <section className="card">
-        <p className="muted">{prefs.isError || options.isError ? 'Không tải được cài đặt.' : 'Đang tải…'}</p>
+        <p className="muted">{prefs.isError || options.isError ? t('Không tải được cài đặt.') : t('Đang tải…')}</p>
       </section>
     )
 
@@ -44,7 +45,7 @@ function PreferencesForm({ title, prefs, options, render }: { title: string; pre
         {message && <p className="form-error span-all" role="alert">{message}</p>}
         <div className="form-actions">
           <button className="btn-primary" disabled={formState.isSubmitting || !formState.isDirty}>
-            {formState.isSubmitting ? 'Đang lưu…' : 'Lưu cài đặt'}
+            {formState.isSubmitting ? t('Đang lưu…') : t('Lưu cài đặt')}
           </button>
         </div>
       </form>

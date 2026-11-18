@@ -1,10 +1,11 @@
+import { t, type Key } from '../i18n'
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { NavIcon, type NavIconName } from '../components/NavIcon'
-import { useAvatarUrl, useProfile, useThemeSync } from '../features/account/queries'
+import { useAvatarUrl, useLanguageSync, useProfile, useThemeSync } from '../features/account/queries'
 import { useAuth } from '../features/auth/AuthContext'
 import { NotificationsNavLink } from '../features/notifications/NotificationsNavLink'
 
-const NAV: { to: string; label: string; icon: NavIconName; end?: boolean }[] = [
+const NAV: { to: string; label: Key; icon: NavIconName; end?: boolean }[] = [
   { to: '/', label: 'Tổng quan', icon: 'home', end: true },
   { to: '/calendar', label: 'Lịch & Sự kiện', icon: 'calendar' },
   { to: '/health', label: 'Sức khỏe', icon: 'health' },
@@ -17,7 +18,7 @@ export function AppLayout() {
   const { status } = useAuth()
   const location = useLocation()
 
-  if (status === 'loading') return <div className="splash">Đang tải…</div>
+  if (status === 'loading') return <div className="splash">{t('Đang tải…')}</div>
   if (status === 'anonymous') return <Navigate to="/login" replace state={{ from: location.pathname }} />
   return <Shell />
 }
@@ -27,6 +28,7 @@ function Shell() {
   const { data: profile } = useProfile()
   const avatarUrl = useAvatarUrl(profile)
   useThemeSync()
+  useLanguageSync()
 
   const name = user?.fullName ?? user?.email ?? ''
 
@@ -38,13 +40,13 @@ function Shell() {
           {NAV.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => (isActive ? 'active' : undefined)}>
               <NavIcon name={n.icon} />
-              {n.label}
+              {t(n.label)}
             </NavLink>
           ))}
           <NotificationsNavLink />
           <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : undefined)}>
             <NavIcon name="settings" />
-            Cài đặt
+            {t('Cài đặt')}
           </NavLink>
         </nav>
         <div className="sidebar-footer">
@@ -55,7 +57,7 @@ function Shell() {
             <span className="user-name">{name}</span>
           </Link>
           <button className="btn-ghost" onClick={() => void logout()}>
-            Đăng xuất
+            {t('Đăng xuất')}
           </button>
         </div>
       </aside>

@@ -1,3 +1,4 @@
+import { t } from '../../i18n'
 import { useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { ApiError } from '../../lib/api'
@@ -21,10 +22,10 @@ export function EventDetailDialog({
   const notFound = error instanceof ApiError && error.status === 404
 
   return (
-    <Modal open={!!eventId} title={event?.title ?? 'Sự kiện'} onClose={onClose}>
-      {isPending && <p className="muted">Đang tải…</p>}
-      {notFound && <p className="muted">Sự kiện không tồn tại hoặc đã bị xóa.</p>}
-      {error && !notFound && <p className="form-error">Không tải được sự kiện.</p>}
+    <Modal open={!!eventId} title={event?.title ?? t('Sự kiện')} onClose={onClose}>
+      {isPending && <p className="muted">{t('Đang tải…')}</p>}
+      {notFound && <p className="muted">{t('Sự kiện không tồn tại hoặc đã bị xóa.')}</p>}
+      {error && !notFound && <p className="form-error">{t('Không tải được sự kiện.')}</p>}
       {event && <EventDetail event={event} onClose={onClose} onEdit={onEdit} />}
     </Modal>
   )
@@ -37,7 +38,7 @@ function useWhen(event: EventDetailDto) {
   const day = (d: Date) => `${weekdayName(d, 'long')}, ${formatDate(d, fmt)}`
   if (event.isAllDay) {
     const last = addDays(end, -1)
-    return isSameDay(start, last) ? `${day(start)} · Cả ngày` : `${day(start)} → ${day(last)} · Cả ngày`
+    return isSameDay(start, last) ? `${day(start)} · ${t('Cả ngày')}` : `${day(start)} → ${day(last)} · ${t('Cả ngày')}`
   }
   return isSameDay(start, end)
     ? `${day(start)} · ${formatTime(start)} – ${formatTime(end)}`
@@ -55,24 +56,24 @@ function EventDetail({ event, onClose, onEdit }: { event: EventDetailDto; onClos
   return (
     <div className="event-detail">
       <div className="row">
-        <span className={`tag tag-cat ${categoryClass(event.category)}`}>{CATEGORY_LABEL[event.category]}</span>
-        <span className={`tag status-tag status-${event.status.toLowerCase()}`}>{STATUS_LABEL[event.status]}</span>
+        <span className={`tag tag-cat ${categoryClass(event.category)}`}>{t(CATEGORY_LABEL[event.category])}</span>
+        <span className={`tag status-tag status-${event.status.toLowerCase()}`}>{t(STATUS_LABEL[event.status])}</span>
       </div>
 
       <dl className="detail-list">
-        <dt>Thời gian</dt>
+        <dt>{t('Thời gian')}</dt>
         <dd>{when}</dd>
         {event.location && (
           <>
-            <dt>Địa điểm</dt>
+            <dt>{t('Địa điểm')}</dt>
             <dd>{event.location}</dd>
           </>
         )}
-        <dt>Nhắc nhở</dt>
-        <dd>{event.reminderOffsets.length ? event.reminderOffsets.map(reminderLabel).join(', ') : 'Không'}</dd>
+        <dt>{t('Nhắc nhở')}</dt>
+        <dd>{event.reminderOffsets.length ? event.reminderOffsets.map(reminderLabel).join(', ') : t('Không')}</dd>
         {event.description && (
           <>
-            <dt>Mô tả</dt>
+            <dt>{t('Mô tả')}</dt>
             <dd className="pre-wrap">{event.description}</dd>
           </>
         )}
@@ -81,25 +82,25 @@ function EventDetail({ event, onClose, onEdit }: { event: EventDetailDto; onClos
       <div className="row">
         {event.status !== 'Completed' && (
           <button className="btn-ghost" disabled={setStatus.isPending} onClick={() => changeStatus('Completed')}>
-            ✓ Hoàn thành
+            ✓ {t('Hoàn thành')}
           </button>
         )}
         {event.status !== 'Cancelled' && (
           <button className="btn-ghost" disabled={setStatus.isPending} onClick={() => changeStatus('Cancelled')}>
-            Hủy sự kiện
+            {t('Hủy sự kiện')}
           </button>
         )}
         {event.status !== 'Planned' && (
           <button className="btn-ghost" disabled={setStatus.isPending} onClick={() => changeStatus('Planned')}>
-            Đặt lại “Đã lên lịch”
+            {t('Đặt lại “Đã lên lịch”')}
           </button>
         )}
         <span className="spacer" />
         <button className="btn-ghost" onClick={() => onEdit(event)}>
-          Sửa
+          {t('Sửa')}
         </button>
         <button className="btn-ghost danger" onClick={() => setConfirming(true)}>
-          Xóa
+          {t('Xóa')}
         </button>
       </div>
 
@@ -107,10 +108,10 @@ function EventDetail({ event, onClose, onEdit }: { event: EventDetailDto; onClos
 
       <ConfirmDialog
         open={confirming}
-        title="Xóa sự kiện?"
+        title={t('Xóa sự kiện?')}
         message={
           <>
-            Sự kiện <strong>{event.title}</strong> cùng ghi chú và lời nhắc sẽ bị xóa.
+            {t('Sự kiện')} <strong>{event.title}</strong> {t('cùng ghi chú và lời nhắc sẽ bị xóa.')}
           </>
         }
         busy={remove.isPending}
@@ -140,7 +141,7 @@ function Notes({ event }: { event: EventDetailDto }) {
 
   return (
     <section className="notes">
-      <h3>Ghi chú ({event.notes.length})</h3>
+      <h3>{t('Ghi chú ({n})', { n: event.notes.length })}</h3>
       <ul className="note-list">
         {event.notes.map((n) => (
           <NoteItem key={n.id} eventId={event.id} note={n} />
@@ -150,7 +151,7 @@ function Notes({ event }: { event: EventDetailDto }) {
         <textarea
           rows={2}
           maxLength={4000}
-          placeholder="Thêm ghi chú…"
+          placeholder={t('Thêm ghi chú…')}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -158,7 +159,7 @@ function Notes({ event }: { event: EventDetailDto }) {
           }}
         />
         <button className="btn-primary" disabled={!draft.trim() || add.isPending} onClick={submit}>
-          Thêm
+          {t('Thêm')}
         </button>
       </div>
     </section>
@@ -184,7 +185,7 @@ function NoteItem({ eventId, note }: { eventId: string; note: EventNoteDto }) {
               disabled={!text.trim() || update.isPending}
               onClick={() => update.mutate({ noteId: note.id, content: text }, { onSuccess: () => setEditing(false) })}
             >
-              Lưu
+              {t('Lưu')}
             </button>
             <button
               className="btn-ghost"
@@ -193,7 +194,7 @@ function NoteItem({ eventId, note }: { eventId: string; note: EventNoteDto }) {
                 setEditing(false)
               }}
             >
-              Hủy bỏ
+              {t('Hủy bỏ')}
             </button>
           </div>
         </>
@@ -205,18 +206,18 @@ function NoteItem({ eventId, note }: { eventId: string; note: EventNoteDto }) {
               {formatDate(updated, fmt)} {formatTime(updated)}
             </small>
             <button className="btn-link" onClick={() => setEditing(true)}>
-              Sửa
+              {t('Sửa')}
             </button>
             <button className="btn-link danger" onClick={() => setConfirming(true)}>
-              Xóa
+              {t('Xóa')}
             </button>
           </div>
         </>
       )}
       <ConfirmDialog
         open={confirming}
-        title="Xóa ghi chú?"
-        message="Ghi chú này sẽ bị xóa vĩnh viễn."
+        title={t('Xóa ghi chú?')}
+        message={t('Ghi chú này sẽ bị xóa vĩnh viễn.')}
         busy={remove.isPending}
         onCancel={() => setConfirming(false)}
         onConfirm={() => remove.mutate(note.id, { onSuccess: () => setConfirming(false) })}

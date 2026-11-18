@@ -1,3 +1,4 @@
+import { t } from '../../i18n'
 import { forwardRef, useState, type InputHTMLAttributes } from 'react'
 import { formatAmountInput, formatAmountTyping, parseAmount } from '../../lib/money'
 import { monthKeyOf, monthLabel, shiftMonth } from './queries'
@@ -8,10 +9,10 @@ export function MonthSwitcher({ value, onChange }: { value: string; onChange: (m
   return (
     <div className="row month-switcher">
       <div className="btn-group">
-        <button className="btn-ghost" aria-label="Tháng trước" onClick={() => onChange(shiftMonth(value, -1))}>
+        <button className="btn-ghost" aria-label={t('Tháng trước')} onClick={() => onChange(shiftMonth(value, -1))}>
           ‹
         </button>
-        <button className="btn-ghost" aria-label="Tháng sau" onClick={() => onChange(shiftMonth(value, 1))}>
+        <button className="btn-ghost" aria-label={t('Tháng sau')} onClick={() => onChange(shiftMonth(value, 1))}>
           ›
         </button>
       </div>
@@ -21,13 +22,13 @@ export function MonthSwitcher({ value, onChange }: { value: string; onChange: (m
           type="month"
           className="input"
           value={value}
-          aria-label="Chọn tháng"
+          aria-label={t('Chọn tháng')}
           onChange={(e) => e.target.value && onChange(e.target.value)}
         />
       </label>
       {value !== current && (
         <button className="btn-link" onClick={() => onChange(current)}>
-          Tháng này
+          {t('Tháng này')}
         </button>
       )}
     </div>
@@ -99,7 +100,7 @@ export function ColorSwatchPicker({ value, onChange }: { value: string; onChange
   const [custom, setCustom] = useState(false)
   const palette = ['#2f9e44', '#0c8599', '#1971c2', '#5f3dc4', '#9c36b5', '#c2255c', '#e03131', '#e8590c', '#f08c00', '#868e96']
   return (
-    <div className="swatches" role="radiogroup" aria-label="Màu">
+    <div className="swatches" role="radiogroup" aria-label={t('Màu')}>
       {palette.map((c) => (
         <button
           key={c}
@@ -112,7 +113,7 @@ export function ColorSwatchPicker({ value, onChange }: { value: string; onChange
           onClick={() => onChange(c)}
         />
       ))}
-      <label className={`swatch swatch-custom${custom ? ' selected' : ''}`} title="Màu khác">
+      <label className={`swatch swatch-custom${custom ? ' selected' : ''}`} title={t('Màu khác')}>
         <input
           type="color"
           value={value}
