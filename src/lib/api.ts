@@ -36,7 +36,7 @@ export interface AuthResponse {
 
 // API origin. Empty = same origin (local dev via the Vite proxy). On GitHub Pages, which only serves
 // static files, VITE_API_BASE_URL must point to the deployed backend (e.g. https://api.example.com).
-const API_BASE = `${(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')}/api/v1`
+export const API_BASE = `${(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')}/api/v1`
 // Cross-origin calls need 'include' so the httpOnly refresh cookie is sent/stored.
 const CREDENTIALS: RequestCredentials = 'include'
 
@@ -48,6 +48,8 @@ export function onAuthChange(fn: (auth: AuthResponse | null) => void) {
   listeners.add(fn)
   return () => listeners.delete(fn)
 }
+
+export const getAccessToken = () => accessToken
 
 export function setSession(auth: AuthResponse | null) {
   accessToken = auth?.accessToken ?? null

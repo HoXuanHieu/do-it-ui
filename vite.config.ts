@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': { target: process.env.VITE_API_PROXY ?? 'http://localhost:5194', changeOrigin: true },
+      '/api': { target: process.env.VITE_API_PROXY ?? 'http://localhost:5194', changeOrigin: true, ws: true },
       '/health': { target: process.env.VITE_API_PROXY ?? 'http://localhost:5194', changeOrigin: true },
     },
   },

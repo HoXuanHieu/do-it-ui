@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { useQueryClient } from '@tanstack/react-query'
 import { onAuthChange, refreshSession, setSession, type UserDto } from '../../lib/api'
 import { authApi } from './api'
+import { useRealtime } from '../../lib/realtime'
 
 type Status = 'loading' | 'authenticated' | 'anonymous'
 
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserDto | null>(null)
   const [status, setStatus] = useState<Status>('loading')
   const queryClient = useQueryClient()
+  useRealtime(status === 'authenticated')
 
   useEffect(() => {
     const off = onAuthChange((auth) => {
