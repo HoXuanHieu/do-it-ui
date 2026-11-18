@@ -122,7 +122,7 @@ function MonthBudget({ day }: { day: Date }) {
           <ProgressBar percent={total.percent} thresholds={data!.alertThresholds} />
           <dl>
             <dt>Đã chi</dt>
-            <dd>{formatMoney(total.spent, data!.currencyCode)} ({total.percent.toLocaleString('vi-VN')}%)</dd>
+            <dd>{formatMoney(total.spent, data!.currencyCode)} ({total.percent.toLocaleString('en-US')}%)</dd>
             <dt>{total.remaining < 0 ? 'Vượt' : 'Còn lại'}</dt>
             <dd className={total.remaining < 0 ? 'amount-expense' : 'amount-income'}>{formatMoney(Math.abs(total.remaining), data!.currencyCode)}</dd>
           </dl>
