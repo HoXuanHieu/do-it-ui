@@ -13,6 +13,7 @@ const TYPE_LABEL: Record<NotificationType, Key> = {
   EventReminder: 'Nhắc lịch',
   WorkoutReminder: 'Tập luyện',
   BudgetAlert: 'Ngân sách',
+  GoalReminder: 'Mục tiêu',
 }
 
 function relativeTime(iso: string, now: number) {
