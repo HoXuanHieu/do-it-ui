@@ -1,3 +1,4 @@
+import { t } from '../../i18n'
 import { formatMoney } from '../../lib/money'
 import { JARS } from './api'
 import { BudgetLine } from './BudgetTab'
@@ -15,25 +16,24 @@ export function JarsTab({ month, onMonthChange }: { month: string; onMonthChange
       <div className="row-between wrap">
         <MonthSwitcher value={month} onChange={onMonthChange} />
         <button className="btn-primary" disabled={!data?.unassignedCount || sync.isPending} onClick={() => sync.mutate(month)}>
-          {sync.isPending ? 'Đang đồng bộ…' : 'Đồng bộ chi tiêu tháng này'}
+          {sync.isPending ? t('Đang đồng bộ…') : t('Đồng bộ chi tiêu tháng này')}
         </button>
       </div>
 
-      {isPending && <p className="muted">Đang tải…</p>}
-      {isError && <p className="form-error">Không tải được các hũ.</p>}
-      {sync.isError && <p className="form-error" role="alert">Không đồng bộ được, vui lòng thử lại.</p>}
+      {isPending && <p className="muted">{t('Đang tải…')}</p>}
+      {isError && <p className="form-error">{t('Không tải được các hũ.')}</p>}
+      {sync.isError && <p className="form-error" role="alert">{t('Không đồng bộ được, vui lòng thử lại.')}</p>}
 
       {data && data.unassignedCount > 0 && (
         <p className="notice" role="status">
-          Có {data.unassignedCount} khoản chi ({formatMoney(data.unassignedSpent, c)}) chưa được xếp vào hũ nào. Bấm
-          “Đồng bộ” để tự xếp theo danh mục; sau đó có thể đổi hũ của từng khoản ở tab Giao dịch.
+          {t('Có {count} khoản chi ({amount}) chưa được xếp vào hũ nào. Bấm “Đồng bộ” để tự xếp theo danh mục; sau đó có thể đổi hũ của từng khoản ở tab Giao dịch.', { count: data.unassignedCount, amount: formatMoney(data.unassignedSpent, c) })}
         </p>
       )}
 
       {data && (
         <section className="card">
-          <h2>Thu nhập tháng: {formatMoney(data.income, c)}</h2>
-          {data.income === 0 && <p className="muted">Chưa có khoản thu trong tháng nên các hũ chưa có tiền.</p>}
+          <h2>{t('Thu nhập tháng: {amount}', { amount: formatMoney(data.income, c) })}</h2>
+          {data.income === 0 && <p className="muted">{t('Chưa có khoản thu trong tháng nên các hũ chưa có tiền.')}</p>}
           <ul className="budget-lines">
             {data.jars.map((j) => (
               <li key={j.jar}>
@@ -42,7 +42,7 @@ export function JarsTab({ month, onMonthChange }: { month: string; onMonthChange
                   thresholds={[80, 100]}
                   line={{
                     categoryId: null,
-                    name: `${JARS[j.jar].label} · ${j.percent}%`,
+                    name: `${t(JARS[j.jar].label)} · ${j.percent}%`,
                     color: JARS[j.jar].color,
                     limit: j.allocated,
                     spent: j.spent,

@@ -1,3 +1,4 @@
+import { t, tx } from '../i18n'
 import { useState, type ComponentProps, type ReactNode } from 'react'
 
 /** Password input with a show/hide toggle; accepts register() props (incl. ref). */
@@ -9,7 +10,7 @@ export function PasswordInput(props: Omit<ComponentProps<'input'>, 'type'>) {
       <button
         type="button"
         className="password-toggle"
-        aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+        aria-label={visible ? t('Ẩn mật khẩu') : t('Hiện mật khẩu')}
         aria-pressed={visible}
         onClick={() => setVisible((v) => !v)}
       >
@@ -29,7 +30,7 @@ export function Field({ label, error, hint, children }: { label: string; error?:
       <span>{label}</span>
       {children}
       {hint && !error && <small className="muted">{hint}</small>}
-      {error && <small className="field-error" role="alert">{error}</small>}
+      {error && <small className="field-error" role="alert">{tx(error)}</small>}
     </label>
   )
 }

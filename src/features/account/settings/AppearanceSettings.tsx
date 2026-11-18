@@ -1,8 +1,9 @@
+import { t, type Key } from '../../../i18n'
 import { Field } from '../../../components/Form'
 import type { Theme } from '../api'
 import { PreferencesCard } from './PreferencesCard'
 
-const THEME_LABEL: Record<Theme, string> = { System: 'Theo hệ thống', Light: 'Sáng', Dark: 'Tối' }
+const THEME_LABEL: Record<Theme, Key> = { System: 'Theo hệ thống', Light: 'Sáng', Dark: 'Tối' }
 const LANGUAGE_LABEL: Record<string, string> = { vi: 'Tiếng Việt', en: 'English' }
 const DATE_FORMAT_LABEL: Record<string, string> = {
   'dd/MM/yyyy': '31/12/2026',
@@ -10,22 +11,22 @@ const DATE_FORMAT_LABEL: Record<string, string> = {
   'yyyy-MM-dd': '2026-12-31',
 }
 
-/** Settings › Giao diện: theme, language, date format. */
+/** Settings › Appearance: theme, language, date format. Language names stay in their own language. */
 export function AppearanceSettings() {
   return (
-    <PreferencesCard title="Giao diện">
+    <PreferencesCard title={t('Giao diện')}>
       {({ register, formState: { errors } }, options) => (
         <>
-          <Field label="Chủ đề" error={errors.theme?.message}>
+          <Field label={t('Chủ đề')} error={errors.theme?.message}>
             <select {...register('theme')}>
-              {options.themes.map((t) => (
-                <option key={t} value={t}>
-                  {THEME_LABEL[t]}
+              {options.themes.map((th) => (
+                <option key={th} value={th}>
+                  {t(THEME_LABEL[th])}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="Ngôn ngữ" error={errors.language?.message} hint="Giao diện tiếng Anh sẽ có ở bản sau.">
+          <Field label={t('Ngôn ngữ')} error={errors.language?.message}>
             <select {...register('language')}>
               {options.languages.map((l) => (
                 <option key={l} value={l}>
@@ -34,7 +35,7 @@ export function AppearanceSettings() {
               ))}
             </select>
           </Field>
-          <Field label="Định dạng ngày" error={errors.dateFormat?.message}>
+          <Field label={t('Định dạng ngày')} error={errors.dateFormat?.message}>
             <select {...register('dateFormat')}>
               {options.dateFormats.map((f) => (
                 <option key={f} value={f}>

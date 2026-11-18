@@ -1,3 +1,4 @@
+import { t, type Key } from '../../i18n'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import type { EventCategory, EventDetailDto, EventFilters, EventStatus } from './api'
@@ -9,10 +10,10 @@ import { EventFormDialog, type EventFormMode } from './EventFormDialog'
 import { CATEGORIES, STATUSES } from './meta'
 import { useEventDetail, useEventsInRange } from './queries'
 
-const VIEWS: { value: CalendarView; label: string }[] = [
+const VIEWS: { value: CalendarView; label: Key }[] = [
   { value: 'month', label: 'Tháng' },
   { value: 'week', label: 'Tuần' },
-  { value: 'day', label: 'Ngày' },
+  { value: 'day', label: 'Ngày|view' },
 ]
 
 function rangeFor(view: CalendarView, date: Date) {
@@ -120,21 +121,21 @@ export function CalendarPage() {
       <header className="cal-toolbar">
         <div className="row">
           <button className="btn-ghost" onClick={() => update({ date: toDateKey(new Date()) })}>
-            Hôm nay
+            {t('Hôm nay')}
           </button>
           <div className="btn-group">
-            <button className="btn-ghost" aria-label="Trước" onClick={() => step(-1)}>
+            <button className="btn-ghost" aria-label={t('Trước')} onClick={() => step(-1)}>
               ‹
             </button>
-            <button className="btn-ghost" aria-label="Sau" onClick={() => step(1)}>
+            <button className="btn-ghost" aria-label={t('Sau')} onClick={() => step(1)}>
               ›
             </button>
           </div>
           <h1 className="cal-title">{title}</h1>
-          {events.isFetching && <span className="muted small">Đang tải…</span>}
+          {events.isFetching && <span className="muted small">{t('Đang tải…')}</span>}
         </div>
         <div className="row">
-          <div className="segmented" role="tablist" aria-label="Chế độ xem">
+          <div className="segmented" role="tablist" aria-label={t('Chế độ xem')}>
             {VIEWS.map((v) => (
               <button
                 key={v.value}
@@ -143,7 +144,7 @@ export function CalendarPage() {
                 className={view === v.value ? 'active' : undefined}
                 onClick={() => update({ view: v.value })}
               >
-                {v.label}
+                {t(v.label)}
               </button>
             ))}
           </div>
@@ -155,7 +156,7 @@ export function CalendarPage() {
               setForm({ kind: 'create', start, allDay: false })
             }}
           >
-            + Tạo sự kiện
+            + {t('Tạo sự kiện')}
           </button>
         </div>
       </header>
@@ -165,24 +166,24 @@ export function CalendarPage() {
         <input
           type="search"
           className="input"
-          placeholder="Tìm theo tiêu đề, mô tả, địa điểm…"
+          placeholder={t('Tìm theo tiêu đề, mô tả, địa điểm…')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          aria-label="Tìm kiếm sự kiện"
+          aria-label={t('Tìm kiếm sự kiện')}
         />
-        <select className="input" value={category} onChange={(e) => setCategory(e.target.value as EventCategory | '')} aria-label="Phân loại">
-          <option value="">Tất cả phân loại</option>
+        <select className="input" value={category} onChange={(e) => setCategory(e.target.value as EventCategory | '')} aria-label={t('Phân loại')}>
+          <option value="">{t('Tất cả phân loại')}</option>
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
-              {c.label}
+              {t(c.label)}
             </option>
           ))}
         </select>
-        <select className="input" value={status} onChange={(e) => setStatus(e.target.value as EventStatus | '')} aria-label="Trạng thái">
-          <option value="">Tất cả trạng thái</option>
+        <select className="input" value={status} onChange={(e) => setStatus(e.target.value as EventStatus | '')} aria-label={t('Trạng thái')}>
+          <option value="">{t('Tất cả trạng thái')}</option>
           {STATUSES.map((s) => (
             <option key={s.value} value={s.value}>
-              {s.label}
+              {t(s.label)}
             </option>
           ))}
         </select>
@@ -195,12 +196,12 @@ export function CalendarPage() {
               setSearch('')
             }}
           >
-            Xóa bộ lọc
+            {t('Xóa bộ lọc')}
           </button>
         )}
       </div>
 
-      {events.isError && <p className="form-error">Không tải được sự kiện.</p>}
+      {events.isError && <p className="form-error">{t('Không tải được sự kiện.')}</p>}
 
       <section className="card cal-card">
         {view === 'month' && <MonthView {...viewProps} />}

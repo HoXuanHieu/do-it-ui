@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { AuthProvider } from '../features/auth/AuthContext'
@@ -36,10 +37,12 @@ const router = createBrowserRouter([
 ], { basename: import.meta.env.BASE_URL })
 
 export function App() {
+  const lang = useLanguage()
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        {/* keyed so every t() call re-renders when the language changes */}
+        <RouterProvider key={lang} router={router} />
       </AuthProvider>
     </QueryClientProvider>
   )

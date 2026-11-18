@@ -1,3 +1,4 @@
+import { t, t as tr, tx } from '../../i18n'
 import { useEffect, useState } from 'react'
 import { formatDate, parseDateKey, weekdayName } from '../../lib/dates'
 import { JARS, type TransactionDto, type TransactionType } from './api'
@@ -64,57 +65,57 @@ export function TransactionsTab({ month, jarMode, onMonthChange }: { month: stri
         <MonthSwitcher value={month} onChange={onMonthChange} />
         <div className="row">
           <button className="btn-ghost income-btn" onClick={() => setDialog({ kind: 'create', type: 'Income' })}>
-            + Khoản thu
+            {t('+ Khoản thu')}
           </button>
           <button className="btn-primary" onClick={() => setDialog({ kind: 'create', type: 'Expense' })}>
-            + Khoản chi
+            {t('+ Khoản chi')}
           </button>
         </div>
       </div>
 
       {/* Summary (BR-FI-004: income and expense separate) */}
       <div className="stat-grid">
-        <Stat label="Tổng thu" value={s ? formatMoney(s.income, s.currencyCode) : '…'} tone="income" />
-        <Stat label="Tổng chi" value={s ? formatMoney(s.expense, s.currencyCode) : '…'} tone="expense" />
-        <Stat label="Chênh lệch" value={s ? formatMoney(s.net, s.currencyCode, { signed: true }) : '…'} tone={s && s.net < 0 ? 'expense' : 'income'} />
-        <Stat label="Tỷ lệ tiết kiệm" value={s ? (s.savingsRate == null ? '—' : `${s.savingsRate.toLocaleString('en-US')}%`) : '…'} />
+        <Stat label={t('Tổng thu')} value={s ? formatMoney(s.income, s.currencyCode) : '…'} tone="income" />
+        <Stat label={t('Tổng chi')} value={s ? formatMoney(s.expense, s.currencyCode) : '…'} tone="expense" />
+        <Stat label={t('Chênh lệch')} value={s ? formatMoney(s.net, s.currencyCode, { signed: true }) : '…'} tone={s && s.net < 0 ? 'expense' : 'income'} />
+        <Stat label={t('Tỷ lệ tiết kiệm')} value={s ? (s.savingsRate == null ? '—' : `${s.savingsRate.toLocaleString('en-US')}%`) : '…'} />
       </div>
 
       {/* FR-FI-006 / FR-FI-008 */}
       <div className="row filters">
-        <input type="search" className="input grow" placeholder="Tìm mô tả, ghi chú, danh mục…" value={search}
-          onChange={(e) => setSearch(e.target.value)} aria-label="Tìm giao dịch" />
-        <select className="input" value={type} onChange={(e) => { setType(e.target.value as TransactionType | ''); setCategoryId('') }} aria-label="Loại">
-          <option value="">Thu &amp; chi</option>
-          <option value="Income">Chỉ khoản thu</option>
-          <option value="Expense">Chỉ khoản chi</option>
+        <input type="search" className="input grow" placeholder={t('Tìm mô tả, ghi chú, danh mục…')} value={search}
+          onChange={(e) => setSearch(e.target.value)} aria-label={t('Tìm giao dịch')} />
+        <select className="input" value={type} onChange={(e) => { setType(e.target.value as TransactionType | ''); setCategoryId('') }} aria-label={t('Loại')}>
+          <option value="">{t('Thu & chi')}</option>
+          <option value="Income">{t('Chỉ khoản thu')}</option>
+          <option value="Expense">{t('Chỉ khoản chi')}</option>
         </select>
-        <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} aria-label="Danh mục">
-          <option value="">Tất cả danh mục</option>
+        <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} aria-label={t('Danh mục')}>
+          <option value="">{t('Tất cả danh mục')}</option>
           {categories.filter((c) => !type || c.type === type).map((c) => (
-            <option key={c.id} value={c.id}>{c.name}{c.isArchived ? ' (đã lưu trữ)' : ''}</option>
+            <option key={c.id} value={c.id}>{tx(c.name)}{c.isArchived ? ` (${t('đã lưu trữ')})` : ''}</option>
           ))}
         </select>
-        <input className="input amount-filter" inputMode="decimal" placeholder="Từ số tiền" value={minRaw}
-          onChange={(e) => setMinRaw(formatAmountTyping(e.target.value, currency))} aria-label="Số tiền tối thiểu" />
-        <input className="input amount-filter" inputMode="decimal" placeholder="Đến số tiền" value={maxRaw}
-          onChange={(e) => setMaxRaw(formatAmountTyping(e.target.value, currency))} aria-label="Số tiền tối đa" />
+        <input className="input amount-filter" inputMode="decimal" placeholder={t('Từ số tiền')} value={minRaw}
+          onChange={(e) => setMinRaw(formatAmountTyping(e.target.value, currency))} aria-label={t('Số tiền tối thiểu')} />
+        <input className="input amount-filter" inputMode="decimal" placeholder={t('Đến số tiền')} value={maxRaw}
+          onChange={(e) => setMaxRaw(formatAmountTyping(e.target.value, currency))} aria-label={t('Số tiền tối đa')} />
         {filtered && (
           <button className="btn-link" onClick={() => { setType(''); setCategoryId(''); setSearch(''); setMinRaw(''); setMaxRaw('') }}>
-            Xóa bộ lọc
+            {t('Xóa bộ lọc')}
           </button>
         )}
       </div>
 
       <section className="card list-card">
-        {list.isPending && <p className="muted pad">Đang tải…</p>}
-        {list.isError && <p className="form-error pad">Không tải được giao dịch.</p>}
+        {list.isPending && <p className="muted pad">{t('Đang tải…')}</p>}
+        {list.isError && <p className="form-error pad">{t('Không tải được giao dịch.')}</p>}
         {list.data && items.length === 0 && (
           <div className="empty pad">
-            <p className="muted">{filtered ? 'Không có giao dịch phù hợp bộ lọc.' : 'Chưa có giao dịch nào trong tháng này.'}</p>
+            <p className="muted">{filtered ? t('Không có giao dịch phù hợp bộ lọc.') : t('Chưa có giao dịch nào trong tháng này.')}</p>
             {!filtered && (
               <button className="btn-primary" onClick={() => setDialog({ kind: 'create', type: 'Expense' })}>
-                Ghi khoản chi đầu tiên
+                {t('Ghi khoản chi đầu tiên')}
               </button>
             )}
           </div>
@@ -135,14 +136,14 @@ export function TransactionsTab({ month, jarMode, onMonthChange }: { month: stri
                   <li key={t.id}>
                     <button className="tx-row" onClick={() => setDialog({ kind: 'edit', tx: t })}>
                       <span className="cat-badge" style={{ background: t.categoryColor }} aria-hidden>
-                        {t.categoryName.charAt(0)}
+                        {tx(t.categoryName).charAt(0)}
                       </span>
                       <span className="tx-main">
-                        <strong>{t.description || t.categoryName}</strong>
+                        <strong>{t.description || tx(t.categoryName)}</strong>
                         <small className="muted">
                           {[
-                            t.description && t.categoryName,
-                            jarMode && t.type === 'Expense' && (t.jar ? `Hũ ${JARS[t.jar].label}` : 'Chưa xếp hũ'),
+                            t.description && tx(t.categoryName),
+                            jarMode && t.type === 'Expense' && (t.jar ? tr('Hũ {name}', { name: tr(JARS[t.jar].label) }) : tr('Chưa xếp hũ')),
                             t.note,
                           ].filter(Boolean).join(' · ')}
                         </small>
@@ -160,10 +161,10 @@ export function TransactionsTab({ month, jarMode, onMonthChange }: { month: stri
       </section>
 
       {totalPages > 1 && (
-        <nav className="pager" aria-label="Phân trang">
-          <button className="btn-ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>← Trước</button>
-          <span className="muted">Trang {page}/{totalPages} · {list.data?.totalCount} giao dịch</span>
-          <button className="btn-ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>Sau →</button>
+        <nav className="pager" aria-label={t('Phân trang')}>
+          <button className="btn-ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('← Trước')}</button>
+          <span className="muted">{t('Trang {page}/{pages} · {count} giao dịch', { page, pages: totalPages, count: list.data?.totalCount ?? 0 })}</span>
+          <button className="btn-ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>{t('Sau →')}</button>
         </nav>
       )}
 

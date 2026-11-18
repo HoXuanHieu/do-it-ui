@@ -1,3 +1,4 @@
+import { t } from '../../i18n'
 import { useEffect, useRef } from 'react'
 import type { EventSummaryDto } from './api'
 import { addDays, formatTime, isSameDay, overlapsDay, startOfMonth, startOfWeek, weekdayName } from '../../lib/dates'
@@ -44,7 +45,7 @@ export function MonthView({ date, today, events, onOpenEvent, onCreateAt, onOpen
   const days = Array.from({ length: 42 }, (_, i) => addDays(first, i))
 
   return (
-    <div className="month" role="grid" aria-label="Lịch tháng">
+    <div className="month" role="grid" aria-label={t('Lịch tháng')}>
       <div className="month-head" role="row">
         {days.slice(0, 7).map((d) => (
           <div key={d.toISOString()} role="columnheader" className="month-weekday">
@@ -66,7 +67,7 @@ export function MonthView({ date, today, events, onOpenEvent, onCreateAt, onOpen
               <button
                 type="button"
                 className="day-num"
-                aria-label={`Xem ngày ${d.getDate()}/${d.getMonth() + 1}`}
+                aria-label={t('Xem ngày {d}/{m}', { d: d.getDate(), m: d.getMonth() + 1 })}
                 onClick={(ev) => {
                   ev.stopPropagation()
                   onOpenDay(d)
@@ -87,7 +88,7 @@ export function MonthView({ date, today, events, onOpenEvent, onCreateAt, onOpen
                       onOpenDay(d)
                     }}
                   >
-                    +{dayEvents.length - MAX_CHIPS} nữa
+                    {t('+{n} nữa', { n: dayEvents.length - MAX_CHIPS })}
                   </button>
                 )}
               </div>
@@ -134,7 +135,7 @@ export function TimeGridView({ date, today, events, onOpenEvent, onCreateAt, onO
       </div>
 
       <div className="tg-allday">
-        <div className="tg-gutter">Cả ngày</div>
+        <div className="tg-gutter">{t('Cả ngày')}</div>
         {days.map((d) => (
           <div
             key={d.toISOString()}
@@ -166,7 +167,7 @@ export function TimeGridView({ date, today, events, onOpenEvent, onCreateAt, onO
                 className="tg-slot"
                 role="button"
                 tabIndex={-1}
-                aria-label={`Tạo sự kiện lúc ${h}:00`}
+                aria-label={t('Tạo sự kiện lúc {h}:00', { h })}
                 onClick={() => onCreateAt(new Date(d.getFullYear(), d.getMonth(), d.getDate(), h), false)}
               />
             ))}

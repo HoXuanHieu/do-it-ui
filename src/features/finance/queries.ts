@@ -1,3 +1,4 @@
+import { locale, t } from '../../i18n'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { financeApi, type BudgetInput, type TransactionFilters, type TransactionInput } from './api'
 import { toDateKey } from '../../lib/dates'
@@ -34,7 +35,7 @@ export function monthRange(key: string) {
 
 export const monthLabel = (key: string) => {
   const d = parseMonthKey(key)!
-  return `Tháng ${d.getMonth() + 1}/${d.getFullYear()}`
+  return t('Tháng {m}/{y}', { m: d.getMonth() + 1, y: d.getFullYear(), month: d.toLocaleDateString(locale(), { month: 'long' }) })
 }
 
 // ---------- Queries ----------

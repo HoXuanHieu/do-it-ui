@@ -1,3 +1,4 @@
+import { locale, t } from '../i18n'
 // Local-time date helpers for the calendar UI (no external date library).
 // Weeks start on Monday (Supplement §3, ISO 8601).
 
@@ -69,14 +70,10 @@ export function formatTime(d: Date) {
   return toTimeValue(d)
 }
 
-const weekdayLong = new Intl.DateTimeFormat('vi-VN', { weekday: 'long' })
-const weekdayShort = new Intl.DateTimeFormat('vi-VN', { weekday: 'short' })
-
-export const weekdayName = (d: Date, style: 'long' | 'short' = 'short') =>
-  (style === 'long' ? weekdayLong : weekdayShort).format(d)
+export const weekdayName = (d: Date, style: 'long' | 'short' = 'short') => d.toLocaleDateString(locale(), { weekday: style })
 
 export function monthTitle(d: Date) {
-  return `Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`
+  return t('Tháng {m}, {y}', { m: d.getMonth() + 1, y: d.getFullYear(), month: d.toLocaleDateString(locale(), { month: 'long' }) })
 }
 
 export function minutesIntoDay(d: Date, day: Date) {
