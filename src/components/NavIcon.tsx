@@ -20,6 +20,9 @@ const ICONS = {
       <circle cx="12" cy="12" r="1" />
     </>
   ),
+  arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
+  check: <path d="M5 12.5 10 17.5 19 7" />,
+  alert: <path d="M12 3 2 20h20zM12 10v4M12 17.5v.01" />,
   bell: <path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" />,
   settings: (
     <>
