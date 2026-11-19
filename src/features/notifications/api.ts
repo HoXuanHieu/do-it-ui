@@ -2,7 +2,7 @@ import { api, type Paged } from '../../lib/api'
 
 // ---------- Notifications (FR-SH-003) ----------
 
-export type NotificationType = 'System' | 'Security' | 'EventReminder' | 'WorkoutReminder' | 'BudgetAlert' | 'GoalReminder'
+export type NotificationType = 'System' | 'Security' | 'EventReminder' | 'WorkoutReminder' | 'BudgetAlert' | 'GoalReminder' | 'HealthCheckIn'
 
 export interface NotificationDto {
   id: string
