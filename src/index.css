@@ -175,7 +175,20 @@ form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
 .list-card { padding: 0; overflow: hidden; }
 .pad { padding: 1.25rem; margin: 0; }
 .notif-list { list-style: none; margin: 0; padding: 0; }
-.notif { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: grid; gap: 0.35rem; }
+.notif { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); border-left: 3px solid transparent; display: flex; gap: 0.75rem; align-items: center; }
+.notif.important.unread { border-left-color: var(--danger); }
+.notif-body { flex: 1; min-width: 0; display: grid; gap: 0.35rem; }
+.notif-actions { display: flex; gap: 0.25rem; flex: none; }
+.icon-btn {
+  display: inline-grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%;
+  border: 1px solid var(--border); background: none; color: var(--primary); cursor: pointer;
+}
+.icon-btn:hover { background: var(--bg); }
+.tag-important {
+  display: inline-flex; align-items: center; gap: 0.25rem; font-weight: 700;
+  color: var(--danger); background: color-mix(in srgb, var(--danger) 15%, transparent); border-color: currentColor;
+}
+.tag-important svg { width: 12px; height: 12px; }
 .notif:last-child { border-bottom: 0; }
 .notif.unread { background: var(--unread-bg); }
 .notif p { margin: 0; }

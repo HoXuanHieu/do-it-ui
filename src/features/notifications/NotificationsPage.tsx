@@ -2,6 +2,7 @@ import { locale, t, type Key } from '../../i18n'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { NavIcon } from '../../components/NavIcon'
 import { notificationsApi, type NotificationDto, type NotificationType } from './api'
 import { notificationKeys } from './queries'
 
@@ -15,6 +16,9 @@ const TYPE_LABEL: Record<NotificationType, Key> = {
   BudgetAlert: 'Ngân sách',
   GoalReminder: 'Mục tiêu',
 }
+
+// Deadline-style reminders the user should not miss.
+const IMPORTANT: ReadonlySet<NotificationType> = new Set(['EventReminder', 'GoalReminder', 'BudgetAlert', 'Security'])
 
 function relativeTime(iso: string, now: number) {
   const rtf = new Intl.RelativeTimeFormat(locale(), { numeric: 'auto' })
@@ -101,25 +105,34 @@ export function NotificationsPage() {
 
 function NotificationItem({ n, now, onRead }: { n: NotificationDto; now: number; onRead: () => void }) {
   const unread = !n.readAt
+  const important = IMPORTANT.has(n.type)
   return (
-    <li className={unread ? 'notif unread' : 'notif'}>
-      <div className="notif-head">
-        <span className={`tag tag-${n.type.toLowerCase()}`}>{t(TYPE_LABEL[n.type])}</span>
-        <strong>{n.title}</strong>
-        <time className="muted" dateTime={n.createdAt} title={new Date(n.createdAt).toLocaleString(locale())}>
-          {relativeTime(n.createdAt, now)}
-        </time>
+    <li className={['notif', unread && 'unread', important && 'important'].filter(Boolean).join(' ')}>
+      <div className="notif-body">
+        <div className="notif-head">
+          {important && (
+            <span className="tag tag-important">
+              <NavIcon name="alert" />
+              {t('Quan trọng')}
+            </span>
+          )}
+          <span className={`tag tag-${n.type.toLowerCase()}`}>{t(TYPE_LABEL[n.type])}</span>
+          <strong>{n.title}</strong>
+          <time className="muted" dateTime={n.createdAt} title={new Date(n.createdAt).toLocaleString(locale())}>
+            {relativeTime(n.createdAt, now)}
+          </time>
+        </div>
+        <p>{n.message}</p>
       </div>
-      <p>{n.message}</p>
-      <div className="row">
+      <div className="notif-actions">
         {n.link && (
-          <Link to={n.link} onClick={unread ? onRead : undefined}>
-            {t('Xem chi tiết')}
+          <Link to={n.link} className="icon-btn" onClick={unread ? onRead : undefined} aria-label={t('Xem chi tiết')} title={t('Xem chi tiết')}>
+            <NavIcon name="arrowRight" />
           </Link>
         )}
         {unread && (
-          <button className="btn-link" onClick={onRead}>
-            {t('Đánh dấu đã đọc')}
+          <button className="icon-btn" onClick={onRead} aria-label={t('Đánh dấu đã đọc')} title={t('Đánh dấu đã đọc')}>
+            <NavIcon name="check" />
           </button>
         )}
       </div>
