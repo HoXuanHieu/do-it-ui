@@ -8,6 +8,7 @@ const MODULE_KEYS: Record<string, readonly (readonly string[])[]> = {
   finance: [['finance'], ['notifications']], // finance writes can raise budget notifications
   events: [['events']],
   goals: [['goals']],
+  health: [['health']],
 }
 
 export function useRealtime(enabled: boolean) {

@@ -1,0 +1,98 @@
+/* Health module */
+.health-page { display: grid; gap: 1rem; }
+.health-page .page-header { margin-bottom: 0; }
+.health-disclaimer { font-size: 0.8rem; color: var(--muted); margin: 0.5rem 0 0; }
+.health-empty { display: grid; justify-items: center; text-align: center; gap: 0.5rem; padding: 2.5rem 1.5rem; }
+.health-empty-icon { font-size: 2.5rem; }
+.health-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.health-card { display: grid; gap: 0.35rem; color: var(--text); text-decoration: none; }
+.health-card h3 { margin: 0; }
+.health-card p { margin: 0; }
+.health-card:hover { border-color: var(--primary); }
+.health-big { font-size: 1.75rem; font-weight: 700; margin: 0.25rem 0; }
+
+.bmi-pill { font-size: 0.75rem; font-weight: 600; padding: 0.15rem 0.6rem; border-radius: 999px; white-space: nowrap; }
+.bmi-underweight { background: color-mix(in srgb, #0c8599 18%, transparent); color: #0c8599; }
+.bmi-normal { background: var(--success-bg); color: var(--success); }
+.bmi-overweight { background: color-mix(in srgb, #e67700 18%, transparent); color: #c25e00; }
+.bmi-obese { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
+.bmi-scale {
+  position: relative; height: 10px; border-radius: 999px; margin: 0.75rem 0 0.5rem;
+  /* 15–35: 18.5 / 23 / 25 → 17.5% / 40% / 50% */
+  background: linear-gradient(to right, #0c8599 0 17.5%, var(--success) 17.5% 40%, #e67700 40% 50%, var(--danger) 50% 100%);
+}
+.bmi-scale span { position: absolute; top: -4px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--text); }
+
+.health-overview { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.macro-row { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin-top: 0.5rem; font-size: 0.9rem; }
+.advice-list { margin: 0.5rem 0; padding-left: 1.25rem; display: grid; gap: 0.4rem; }
+.advice-ok::marker { color: var(--success); }
+.advice-warn { color: var(--text); }
+.advice-warn::marker { color: #e67700; }
+.advice-info::marker { color: var(--primary); }
+
+.health-due, .health-due-card { border-left: 4px solid #e67700; }
+.health-due {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+  border-radius: 8px; background: color-mix(in srgb, #e67700 12%, var(--surface));
+}
+.input-sm { width: 5rem; font: inherit; padding: 0.35rem 0.5rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.input-sm[aria-invalid='true'] { border-color: var(--danger); }
+
+.measure-form { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); align-items: end; margin: 0.75rem 0 0; }
+.measure-form input { width: 100%; min-width: 0; }
+.health-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.health-table th, .health-table td { padding: 0.5rem 1.25rem; text-align: left; border-top: 1px solid var(--border); }
+.health-table th { color: var(--muted); font-weight: 500; }
+.delta-up { color: #c25e00; }
+.delta-down { color: var(--success); }
+.weight-chart { width: 100%; height: auto; margin-top: 0.5rem; }
+.weight-chart polyline { fill: none; stroke: var(--primary); stroke-width: 2.5; }
+.weight-chart circle { fill: var(--surface); stroke: var(--primary); stroke-width: 2; }
+.weight-chart .target { stroke: var(--success); stroke-dasharray: 6 4; }
+.weight-chart text { fill: var(--muted); font-size: 12px; }
+
+/* Nutrition */
+.kcal-bar { height: 10px; border-radius: 999px; background: var(--border); overflow: hidden; margin: 0.5rem 0; }
+.kcal-bar span { display: block; height: 100%; background: var(--primary); }
+.kcal-ok .kcal-bar span, .bar.kcal-ok { background: var(--success); }
+.kcal-over .kcal-bar span, .bar.kcal-over { background: var(--danger); }
+.kcal-low .kcal-bar span, .bar.kcal-low { background: #e67700; }
+.kcal-card p { margin: 0.25rem 0; }
+.health-two-col { display: grid; gap: 1rem; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; }
+.meal-block { padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+.meal-block h3 { font-size: 0.95rem; margin: 0; }
+.food-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.5rem; margin-top: 0.35rem; border: 1px solid transparent; border-radius: 8px; }
+.food-row.planned { border: 1px dashed var(--border); background: var(--bg); }
+.food-name { flex: 1; text-align: left; color: var(--text); }
+.menu-list { list-style: none; padding: 0; margin: 0.75rem 0; display: grid; gap: 0.6rem; }
+.menu-list li { display: grid; padding: 0.5rem 0.75rem; border-radius: 8px; background: var(--bg); }
+.week-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; height: 160px; margin: 0.75rem 0 0.25rem; position: relative; }
+.week-bars::after { /* target line at 80% of the bar area */
+  content: ''; position: absolute; left: 0; right: 0; bottom: calc(2.6rem + (100% - 2.6rem) * 0.8);
+  border-top: 1px dashed var(--muted); pointer-events: none;
+}
+.week-bar { display: grid; grid-template-rows: 1fr auto auto; align-items: end; justify-items: center; font: inherit; border: 0; background: none; color: var(--text); cursor: pointer; padding: 0; border-radius: 6px; }
+.week-bar.active { background: var(--bg); }
+.week-bar .bar { width: 60%; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--border); align-self: end; }
+
+/* Workouts */
+.workout-week { display: grid; gap: 0.75rem; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.workout-day { display: grid; gap: 0.5rem; align-content: start; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); min-height: 180px; }
+.workout-day.today { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.workout-item { display: grid; gap: 0.2rem; padding: 0.5rem; border-radius: 8px; background: var(--bg); }
+.workout-item.done { background: var(--success-bg); }
+.workout-item.done .btn-link { text-decoration: line-through; color: var(--success); }
+.workout-item.suggestion { border: 1px dashed var(--primary); background: transparent; }
+.workout-item p { margin: 0; }
+.workout-item > .btn-link, .workout-item > .btn-ghost { justify-self: start; }
+.workout-item details { font-size: 0.85rem; }
+.workout-item summary { cursor: pointer; }
+
+@media (max-width: 1100px) {
+  .workout-week { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .health-two-col { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 768px) {
+  .health-table th, .health-table td { padding: 0.5rem; }
+}

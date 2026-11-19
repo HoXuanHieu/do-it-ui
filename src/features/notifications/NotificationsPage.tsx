@@ -15,6 +15,7 @@ const TYPE_LABEL: Record<NotificationType, Key> = {
   WorkoutReminder: 'Tập luyện',
   BudgetAlert: 'Ngân sách',
   GoalReminder: 'Mục tiêu',
+  HealthCheckIn: 'Sức khỏe',
 }
 
 // Deadline-style reminders the user should not miss.

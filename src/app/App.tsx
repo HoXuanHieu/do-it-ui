@@ -5,7 +5,7 @@ import { AuthProvider } from '../features/auth/AuthContext'
 import { ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage } from '../features/auth/AuthPages'
 import { AppLayout } from '../layouts/AppLayout'
 import { DashboardPage } from '../features/dashboard/DashboardPage'
-import { ComingSoonPage, NotFoundPage } from '../pages/Pages'
+import { NotFoundPage } from '../pages/Pages'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
@@ -22,7 +22,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'calendar', lazy: async () => ({ Component: (await import('../features/calendar/CalendarPage')).CalendarPage }) },
-      { path: 'health', element: <ComingSoonPage title="Sức khỏe" /> },
+      { path: 'health', lazy: async () => ({ Component: (await import('../features/health/HealthPage')).HealthPage }) },
+      { path: 'health/:id', lazy: async () => ({ Component: (await import('../features/health/HealthProfilePage')).HealthProfilePage }) },
       { path: 'finance', lazy: async () => ({ Component: (await import('../features/finance/FinancePage')).FinancePage }) },
       { path: 'goals', lazy: async () => ({ Component: (await import('../features/goals/GoalsPage')).GoalsPage }) },
       { path: 'goals/:id', lazy: async () => ({ Component: (await import('../features/goals/GoalDetailPage')).GoalDetailPage }) },

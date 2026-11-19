@@ -6,6 +6,7 @@ import './index.css'
 import './styles/calendar.css'
 import './styles/finance.css'
 import './styles/goals.css'
+import './styles/health.css'
 
 await initLanguage()
 
