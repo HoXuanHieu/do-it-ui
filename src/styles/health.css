@@ -104,3 +104,12 @@
 .med-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
 .med-list li { display: flex; align-items: center; gap: 0.5rem; }
 .med-list li .icon-btn { margin-left: auto; }
+
+/* /health: profiles 70% | medication reminders 30%, stacked on narrow screens */
+.health-split { display: grid; gap: 1rem; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: start; }
+.health-main { display: grid; gap: 1rem; align-content: start; }
+.health-side { position: sticky; top: 1rem; }
+@media (max-width: 900px) {
+  .health-split { grid-template-columns: 1fr; }
+  .health-side { position: static; }
+}
