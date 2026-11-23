@@ -695,5 +695,13 @@
   "Nhập tên hồ sơ": "Enter a profile name",
   "Chọn ngày sinh": "Pick a date of birth",
   "Số không hợp lệ hoặc ngoài khoảng cho phép": "Invalid number or out of the allowed range",
-  "Tối đa 100 ký tự": "At most 100 characters"
+  "Tối đa 100 ký tự": "At most 100 characters",
+  "Nhắc uống thuốc": "Medication reminders",
+  "Tên thuốc": "Medicine name",
+  "Giờ uống": "Time to take",
+  "Chưa có lời nhắc nào.": "No reminders yet.",
+  "Đã uống hôm nay": "Taken today",
+  "Đến giờ uống thuốc": "Time to take your medicine",
+  "Nhắc lại sau 10 phút": "Remind me in 10 minutes",
+  "Đã uống": "Taken"
 }

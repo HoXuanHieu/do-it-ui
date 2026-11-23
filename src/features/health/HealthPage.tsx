@@ -2,6 +2,7 @@ import { locale, t } from '../../i18n'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import type { HealthProfileDto } from './api'
+import { MedicationCard } from './MedicationReminder'
 import { ProfileFormDialog } from './ProfileFormDialog'
 import { BMI_LABEL, GOALS, labelOf, num, useHealthProfiles } from './queries'
 
@@ -40,6 +41,8 @@ export function HealthPage() {
       <div className="health-grid">
         {profiles?.map((p) => <ProfileCard key={p.id} p={p} />)}
       </div>
+
+      <MedicationCard />
 
       <Disclaimer />
       <ProfileFormDialog open={creating} onClose={() => setCreating(false)} onSaved={(p) => navigate(`/health/${p.id}`)} />
