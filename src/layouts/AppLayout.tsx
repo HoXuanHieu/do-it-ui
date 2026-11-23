@@ -3,6 +3,7 @@ import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { NavIcon, type NavIconName } from '../components/NavIcon'
 import { useAvatarUrl, useLanguageSync, useProfile, useThemeSync } from '../features/account/queries'
 import { useAuth } from '../features/auth/AuthContext'
+import { MedicationReminderPopup } from '../features/health/MedicationReminder'
 import { NotificationsNavLink } from '../features/notifications/NotificationsNavLink'
 
 const NAV: { to: string; label: Key; icon: NavIconName; end?: boolean }[] = [
@@ -64,6 +65,7 @@ function Shell() {
       <main className="content">
         <Outlet />
       </main>
+      <MedicationReminderPopup />
     </div>
   )
 }
