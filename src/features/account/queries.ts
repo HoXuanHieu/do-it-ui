@@ -1,14 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { notificationsApi, preferencesApi, profileApi, type PreferencesDto, type ProfileDto } from '../../lib/api'
+import { setLanguage } from '../../i18n'
+import { preferencesApi, profileApi, type PreferencesDto, type ProfileDto } from './api'
 
 export const keys = {
   profile: ['profile'] as const,
   avatar: (version: string) => ['profile', 'avatar', version] as const,
   preferences: ['preferences'] as const,
   preferenceOptions: ['preferences', 'options'] as const,
-  notifications: ['notifications'] as const,
-  unreadCount: ['notifications', 'unread-count'] as const,
 }
 
 export const useProfile = () => useQuery({ queryKey: keys.profile, queryFn: profileApi.get })
@@ -54,14 +53,6 @@ export function useAvatarUrl(profile: ProfileDto | undefined) {
   return profile?.hasAvatar ? (data ?? null) : null
 }
 
-export const useUnreadCount = () =>
-  useQuery({
-    queryKey: keys.unreadCount,
-    queryFn: notificationsApi.unreadCount,
-    refetchInterval: 60_000, // poll; web push is P1 (Supplement SUP-TM-03)
-    refetchOnWindowFocus: true,
-  })
-
 /** Apply the theme preference to <html data-theme>; "System" defers to prefers-color-scheme. */
 export function useThemeSync() {
   const { data } = usePreferences()
@@ -69,5 +60,13 @@ export function useThemeSync() {
     const root = document.documentElement
     if (!data || data.theme === 'System') delete root.dataset.theme
     else root.dataset.theme = data.theme.toLowerCase()
+  }, [data])
+}
+
+/** Apply the language preference; the app root re-renders on change. */
+export function useLanguageSync() {
+  const { data } = usePreferences()
+  useEffect(() => {
+    if (data) void setLanguage(data.language)
   }, [data])
 }

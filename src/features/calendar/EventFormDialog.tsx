@@ -1,10 +1,11 @@
+import { t, tx, type Key } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
-import type { EventCategory, EventDetailDto, EventInput, EventStatus } from '../../lib/api'
+import type { EventCategory, EventDetailDto, EventInput, EventStatus } from './api'
 import { addDays, combine, parseDateKey, toDateKey, toTimeValue } from '../../lib/dates'
 import { applyServerErrors } from '../../lib/forms'
 import { CATEGORIES, MAX_REMINDERS, REMINDERS, STATUSES } from './meta'
@@ -22,7 +23,7 @@ const schema = z
     status: z.enum(['Planned', 'Completed', 'Cancelled']),
     location: z.string().max(200, 'Tối đa 200 ký tự'),
     description: z.string().max(4000, 'Tối đa 4000 ký tự'),
-    reminders: z.array(z.string()).max(MAX_REMINDERS, `Tối đa ${MAX_REMINDERS} lời nhắc`),
+    reminders: z.array(z.string()).max(MAX_REMINDERS, 'Tối đa 5 lời nhắc' satisfies Key),
     note: z.string().max(4000, 'Tối đa 4000 ký tự'),
   })
   .superRefine((v, ctx) => {
@@ -104,7 +105,7 @@ export function EventFormDialog({
   onSaved: (event: EventDetailDto) => void
 }) {
   return (
-    <Modal open={!!mode} title={mode?.kind === 'edit' ? 'Sửa sự kiện' : 'Tạo sự kiện'} onClose={onClose}>
+    <Modal open={!!mode} title={mode?.kind === 'edit' ? t('Sửa sự kiện') : t('Tạo sự kiện')} onClose={onClose}>
       {mode && <EventForm key={mode.kind === 'edit' ? mode.event.id : mode.start.toISOString()} mode={mode} onClose={onClose} onSaved={onSaved} />}
     </Modal>
   )
@@ -148,8 +149,8 @@ function EventForm({ mode, onClose, onSaved }: { mode: EventFormMode; onClose: (
 
   return (
     <form onSubmit={onSubmit} noValidate className="form-grid event-form">
-      <Field label="Tiêu đề" error={formState.errors.title?.message}>
-        <input autoFocus maxLength={200} placeholder="VD: Họp nhóm, Khám răng…" {...register('title')} />
+      <Field label={t('Tiêu đề')} error={formState.errors.title?.message}>
+        <input autoFocus maxLength={200} placeholder={t('VD: Họp nhóm, Khám răng…')} {...register('title')} />
       </Field>
 
       <label className="check span-all">
@@ -161,10 +162,10 @@ function EventForm({ mode, onClose, onSaved }: { mode: EventFormMode; onClose: (
             },
           })}
         />
-        Cả ngày
+        {t('Cả ngày')}
       </label>
 
-      <Field label="Bắt đầu" error={formState.errors.startDate?.message ?? formState.errors.startTime?.message}>
+      <Field label={t('Bắt đầu')} error={formState.errors.startDate?.message ?? formState.errors.startTime?.message}>
         <div className="row-tight">
           <input
             type="date"
@@ -178,31 +179,31 @@ function EventForm({ mode, onClose, onSaved }: { mode: EventFormMode; onClose: (
           {!isAllDay && <input type="time" step={300} {...register('startTime')} />}
         </div>
       </Field>
-      <Field label="Kết thúc" error={formState.errors.endDate?.message ?? formState.errors.endTime?.message}>
+      <Field label={t('Kết thúc')} error={formState.errors.endDate?.message ?? formState.errors.endTime?.message}>
         <div className="row-tight">
           <input type="date" min={startDate} {...register('endDate')} />
           {!isAllDay && <input type="time" step={300} {...register('endTime')} />}
         </div>
       </Field>
 
-      <Field label="Phân loại" error={formState.errors.category?.message}>
+      <Field label={t('Phân loại')} error={formState.errors.category?.message}>
         <select {...register('category')}>
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
-              {c.label}
+              {t(c.label)}
             </option>
           ))}
         </select>
       </Field>
-      <Field label="Địa điểm" error={formState.errors.location?.message}>
+      <Field label={t('Địa điểm')} error={formState.errors.location?.message}>
         <input maxLength={200} {...register('location')} />
       </Field>
       {mode.kind === 'edit' && (
-        <Field label="Trạng thái" error={formState.errors.status?.message}>
+        <Field label={t('Trạng thái')} error={formState.errors.status?.message}>
           <select {...register('status')}>
             {STATUSES.map((s) => (
               <option key={s.value} value={s.value}>
-                {s.label}
+                {t(s.label)}
               </option>
             ))}
           </select>
@@ -210,13 +211,13 @@ function EventForm({ mode, onClose, onSaved }: { mode: EventFormMode; onClose: (
       )}
 
       <div className="field span-all">
-        <span>Mô tả</span>
+        <span>{t('Mô tả')}</span>
         <textarea rows={3} maxLength={4000} {...register('description')} />
-        {formState.errors.description && <small className="field-error">{formState.errors.description.message}</small>}
+        {formState.errors.description && <small className="field-error">{tx(formState.errors.description.message ?? '')}</small>}
       </div>
 
       <fieldset className="fieldset span-all">
-        <legend>Nhắc nhở</legend>
+        <legend>{t('Nhắc nhở')}</legend>
         <div className="check-grid">
           {REMINDERS.map((r) => {
             const checked = reminders.includes(String(r.value))
@@ -228,17 +229,17 @@ function EventForm({ mode, onClose, onSaved }: { mode: EventFormMode; onClose: (
                   disabled={!checked && reminders.length >= MAX_REMINDERS}
                   {...register('reminders')}
                 />
-                {r.label}
+                {t(r.label)}
               </label>
             )
           })}
         </div>
-        {formState.errors.reminders && <small className="field-error">{formState.errors.reminders.message}</small>}
+        {formState.errors.reminders && <small className="field-error">{tx(formState.errors.reminders.message ?? '')}</small>}
       </fieldset>
 
       {mode.kind === 'create' && (
         <div className="field span-all">
-          <span>Ghi chú (không bắt buộc)</span>
+          <span>{t('Ghi chú (không bắt buộc)')}</span>
           <textarea rows={2} maxLength={4000} {...register('note')} />
         </div>
       )}
@@ -246,10 +247,10 @@ function EventForm({ mode, onClose, onSaved }: { mode: EventFormMode; onClose: (
       {formError && <p className="form-error span-all" role="alert">{formError}</p>}
       <div className="form-actions">
         <button type="button" className="btn-ghost" onClick={onClose}>
-          Hủy bỏ
+          {t('Hủy bỏ')}
         </button>
         <button className="btn-primary" disabled={formState.isSubmitting}>
-          {formState.isSubmitting ? 'Đang lưu…' : mode.kind === 'create' ? 'Tạo sự kiện' : 'Lưu thay đổi'}
+          {formState.isSubmitting ? t('Đang lưu…') : mode.kind === 'create' ? t('Tạo sự kiện') : t('Lưu thay đổi')}
         </button>
       </div>
     </form>

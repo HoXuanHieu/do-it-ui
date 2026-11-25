@@ -1,14 +1,15 @@
+import { t, type Key } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Field } from '../../components/Form'
 import { applyServerErrors } from '../../lib/forms'
-import { profileApi, type Gender, type ProfileDto } from '../../lib/api'
+import { profileApi, type Gender, type ProfileDto } from './api'
 import { useAuth } from '../auth/AuthContext'
 import { useAvatarUrl, useProfile, useSetProfile } from './queries'
 
-const GENDERS: { value: Gender; label: string }[] = [
+const GENDERS: { value: Gender; label: Key }[] = [
   { value: 'Male', label: 'Nam' },
   { value: 'Female', label: 'Nữ' },
   { value: 'Other', label: 'Khác' },
@@ -35,11 +36,11 @@ export function ProfilePage() {
   return (
     <>
       <header className="page-header">
-        <h1>Hồ sơ cá nhân</h1>
-        <p className="muted">Thông tin cơ bản của bạn. Múi giờ và tiền tệ nằm trong Cài đặt.</p>
+        <h1>{t('Hồ sơ cá nhân')}</h1>
+        <p className="muted">{t('Thông tin cơ bản của bạn. Múi giờ và tiền tệ nằm trong Cài đặt.')}</p>
       </header>
-      {isPending && <p className="muted">Đang tải…</p>}
-      {isError && <p className="form-error">Không tải được hồ sơ.</p>}
+      {isPending && <p className="muted">{t('Đang tải…')}</p>}
+      {isError && <p className="form-error">{t('Không tải được hồ sơ.')}</p>}
       {profile && (
         <div className="stack">
           <AvatarCard profile={profile} />
@@ -65,7 +66,7 @@ function AvatarCard({ profile }: { profile: ProfileDto }) {
     e.target.value = ''
     if (!file) return
     setError('')
-    if (file.size > MAX_AVATAR) return setError('Ảnh tối đa 2 MB.')
+    if (file.size > MAX_AVATAR) return setError(t('Ảnh tối đa 2 MB.'))
     setBusy(true)
     try {
       setProfile(await profileApi.uploadAvatar(file))
@@ -89,22 +90,22 @@ function AvatarCard({ profile }: { profile: ProfileDto }) {
   return (
     <section className="card avatar-card">
       <div className="avatar avatar-lg" aria-hidden={!avatarUrl}>
-        {avatarUrl ? <img src={avatarUrl} alt="Ảnh đại diện" /> : <span>{initials}</span>}
+        {avatarUrl ? <img src={avatarUrl} alt={t('Ảnh đại diện')} /> : <span>{initials}</span>}
       </div>
       <div className="stack-sm">
-        <strong>{profile.fullName || 'Chưa đặt tên'}</strong>
+        <strong>{profile.fullName || t('Chưa đặt tên')}</strong>
         <span className="muted">{profile.email}</span>
         <div className="row">
           <button type="button" className="btn-ghost" disabled={busy} onClick={() => input.current?.click()}>
-            {busy ? 'Đang xử lý…' : profile.hasAvatar ? 'Đổi ảnh' : 'Tải ảnh lên'}
+            {busy ? t('Đang xử lý…') : profile.hasAvatar ? t('Đổi ảnh') : t('Tải ảnh lên')}
           </button>
           {profile.hasAvatar && (
             <button type="button" className="btn-ghost" disabled={busy} onClick={() => void onRemove()}>
-              Xóa ảnh
+              {t('Xóa ảnh')}
             </button>
           )}
         </div>
-        <small className="muted">JPEG, PNG hoặc WebP, tối đa 2 MB.</small>
+        <small className="muted">{t('JPEG, PNG hoặc WebP, tối đa 2 MB.')}</small>
         {error && <small className="field-error" role="alert">{error}</small>}
         <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => void onPick(e)} />
       </div>
@@ -142,20 +143,20 @@ function ProfileForm({ profile }: { profile: ProfileDto }) {
 
   return (
     <section className="card">
-      <h2>Thông tin cá nhân</h2>
+      <h2>{t('Thông tin cá nhân')}</h2>
       <form onSubmit={onSubmit} noValidate className="form-grid">
-        <Field label="Họ tên" error={formState.errors.fullName?.message}>
+        <Field label={t('Họ tên')} error={formState.errors.fullName?.message}>
           <input autoComplete="name" {...register('fullName')} />
         </Field>
-        <Field label="Ngày sinh" error={formState.errors.dateOfBirth?.message}>
+        <Field label={t('Ngày sinh')} error={formState.errors.dateOfBirth?.message}>
           <input type="date" min="1900-01-01" max={todayIso()} {...register('dateOfBirth')} />
         </Field>
-        <Field label="Giới tính" error={formState.errors.gender?.message}>
+        <Field label={t('Giới tính')} error={formState.errors.gender?.message}>
           <select {...register('gender')}>
-            <option value="">— Chưa chọn —</option>
+            <option value="">{t('— Chưa chọn —')}</option>
             {GENDERS.map((g) => (
               <option key={g.value} value={g.value}>
-                {g.label}
+                {t(g.label)}
               </option>
             ))}
           </select>
@@ -163,7 +164,7 @@ function ProfileForm({ profile }: { profile: ProfileDto }) {
         {status && <p className="form-error" role="alert">{status}</p>}
         <div className="form-actions">
           <button className="btn-primary" disabled={formState.isSubmitting || !formState.isDirty}>
-            {formState.isSubmitting ? 'Đang lưu…' : 'Lưu thay đổi'}
+            {formState.isSubmitting ? t('Đang lưu…') : t('Lưu thay đổi')}
           </button>
         </div>
       </form>

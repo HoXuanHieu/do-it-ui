@@ -1,4 +1,4 @@
-import type { EventSummaryDto } from '../../lib/api'
+import type { EventSummaryDto } from './api'
 import { addDays, minutesIntoDay, overlapsDay, startOfDay } from '../../lib/dates'
 
 export interface PositionedEvent {

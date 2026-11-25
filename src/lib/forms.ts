@@ -1,3 +1,4 @@
+import { t, type Key } from '../i18n'
 import type { FieldValues, Path, UseFormSetError } from 'react-hook-form'
 import { ApiError } from './api'
 
@@ -10,17 +11,18 @@ export function applyServerErrors<T extends FieldValues>(err: unknown, setError?
       }
       return ''
     }
-    if (err.status === 401) return 'Email hoặc mật khẩu không đúng.'
-    if (err.status === 423) return 'Tài khoản tạm khóa do nhập sai nhiều lần. Vui lòng thử lại sau 15 phút.'
-    if (err.status === 429) return 'Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.'
+    if (err.status === 401) return t('Email hoặc mật khẩu không đúng.')
+    if (err.status === 423) return t('Tài khoản tạm khóa do nhập sai nhiều lần. Vui lòng thử lại sau 15 phút.')
+    if (err.status === 429) return t('Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.')
     if (err.problem.errors) return translate(Object.values(err.problem.errors)[0][0])
   }
-  return 'Đã có lỗi xảy ra, vui lòng thử lại.'
+  return t('Đã có lỗi xảy ra, vui lòng thử lại.')
 }
 
-// Server messages are English (API contract); map the common ones for the Vietnamese UI.
-const MESSAGES: Record<string, string> = {
+// Server messages are English (API contract); map the common ones to UI keys.
+const MESSAGES: Record<string, Key> = {
   'Email is already registered.': 'Email đã được đăng ký.',
+  'No account found with this email.': 'Email chưa được đăng ký. Vui lòng kiểm tra lại email hoặc đăng ký tài khoản mới.',
   'Current password is incorrect.': 'Mật khẩu hiện tại không đúng.',
   'The reset link is invalid or has expired.': 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.',
   'Only JPEG, PNG or WebP images are allowed.': 'Chỉ chấp nhận ảnh JPEG, PNG hoặc WebP.',
@@ -42,8 +44,8 @@ const MESSAGES: Record<string, string> = {
 }
 
 function translate(message: string) {
-  return MESSAGES[message] ?? message
+  return message in MESSAGES ? t(MESSAGES[message]) : message
 }
 
 /** Password rules shared by register / change / reset (SUP-AUTH-01). */
-export const PASSWORD_HINT = 'Tối thiểu 8 ký tự, có chữ hoa, chữ thường và chữ số.'
+export const PASSWORD_HINT: Key = 'Tối thiểu 8 ký tự, có chữ hoa, chữ thường và chữ số.'

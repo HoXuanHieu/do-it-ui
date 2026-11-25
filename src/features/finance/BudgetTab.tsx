@@ -1,11 +1,12 @@
+import { locale, t, tx } from '../../i18n'
 import { useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { ApiError } from '../../lib/api'
-import type { BudgetLineDto, BudgetOverviewDto } from '../../lib/financeApi'
+import type { BudgetLineDto, BudgetOverviewDto } from './api'
 import { applyServerErrors } from '../../lib/forms'
 import { formatAmountInput, formatMoney, parseAmount } from '../../lib/money'
 import { AmountInput, MonthSwitcher, ProgressBar } from './components'
-import { monthLabel, shiftMonth, useBudget, useCategories, useCopyBudget, useDeleteBudget, useSaveBudget } from './queries'
+import { parseMonthKey, shiftMonth, useBudget, useCategories, useCopyBudget, useDeleteBudget, useSaveBudget } from './queries'
 
 /** FR-FI-009..012: monthly budget, category limits, usage and remaining. */
 export function BudgetTab({ month, onMonthChange }: { month: string; onMonthChange: (m: string) => void }) {
@@ -22,24 +23,26 @@ export function BudgetTab({ month, onMonthChange }: { month: string; onMonthChan
         <MonthSwitcher value={month} onChange={onMonthChange} />
         {budget?.exists && (
           <div className="row">
-            <button className="btn-ghost" onClick={() => setEditing(true)}>Sửa ngân sách</button>
-            <button className="btn-ghost danger" onClick={() => setConfirmDelete(true)}>Xóa</button>
+            <button className="btn-ghost" onClick={() => setEditing(true)}>{t('Sửa ngân sách')}</button>
+            <button className="btn-ghost danger" onClick={() => setConfirmDelete(true)}>{t('Xóa')}</button>
           </div>
         )}
       </div>
 
-      {isPending && <p className="muted">Đang tải…</p>}
-      {isError && <p className="form-error">Không tải được ngân sách.</p>}
+      {isPending && <p className="muted">{t('Đang tải…')}</p>}
+      {isError && <p className="form-error">{t('Không tải được ngân sách.')}</p>}
 
       {budget && !budget.exists && (
         <section className="card empty">
-          <h2>Chưa có ngân sách cho {monthLabel(month).toLowerCase()}</h2>
+          <h2>{t('Chưa có ngân sách cho tháng {m}/{y}', monthVars(month))}</h2>
           <p className="muted">
-            Đã chi {formatMoney(budget.totalSpent, budget.currencyCode)} trong tháng. Đặt hạn mức để theo dõi và nhận cảnh báo khi
-            chi tiêu đạt {budget.alertThresholds.join('% và ')}%.
+            {t('Đã chi {amount} trong tháng. Đặt hạn mức để theo dõi và nhận cảnh báo khi chi tiêu đạt {thresholds}.', {
+              amount: formatMoney(budget.totalSpent, budget.currencyCode),
+              thresholds: percentList(budget.alertThresholds, 'conjunction'),
+            })}
           </p>
           <div className="row center-row">
-            <button className="btn-primary" onClick={() => setEditing(true)}>Tạo ngân sách</button>
+            <button className="btn-primary" onClick={() => setEditing(true)}>{t('Tạo ngân sách')}</button>
             <button
               className="btn-ghost"
               disabled={copy.isPending}
@@ -47,12 +50,12 @@ export function BudgetTab({ month, onMonthChange }: { month: string; onMonthChan
                 copy.mutate(month, {
                   onError: (e) =>
                     setCopyError(e instanceof ApiError && e.status === 404
-                      ? `${monthLabel(shiftMonth(month, -1))} chưa có ngân sách để sao chép.`
-                      : 'Không sao chép được ngân sách.'),
+                      ? t('Tháng {m}/{y} chưa có ngân sách để sao chép.', monthVars(shiftMonth(month, -1)))
+                      : t('Không sao chép được ngân sách.')),
                 })
               }
             >
-              Sao chép từ tháng trước
+              {t('Sao chép từ tháng trước')}
             </button>
           </div>
           {copyError && <p className="form-error">{copyError}</p>}
@@ -61,14 +64,14 @@ export function BudgetTab({ month, onMonthChange }: { month: string; onMonthChan
 
       {budget?.exists && <BudgetOverview budget={budget} />}
 
-      <Modal open={editing} title={`Ngân sách ${monthLabel(month).toLowerCase()}`} onClose={() => setEditing(false)}>
+      <Modal open={editing} title={t('Ngân sách tháng {m}/{y}', monthVars(month))} onClose={() => setEditing(false)}>
         {editing && budget && <BudgetForm month={month} budget={budget} onDone={() => setEditing(false)} />}
       </Modal>
 
       <ConfirmDialog
         open={confirmDelete}
-        title="Xóa ngân sách tháng này?"
-        message="Hạn mức và lịch sử cảnh báo của tháng sẽ bị xóa. Giao dịch không bị ảnh hưởng."
+        title={t('Xóa ngân sách tháng này?')}
+        message={t('Hạn mức và lịch sử cảnh báo của tháng sẽ bị xóa. Giao dịch không bị ảnh hưởng.')}
         busy={remove.isPending}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={() => remove.mutate(month, { onSuccess: () => setConfirmDelete(false) })}
@@ -87,13 +90,13 @@ function BudgetOverview({ budget }: { budget: BudgetOverviewDto }) {
         </section>
       ) : (
         <section className="card">
-          <p className="muted">Không đặt tổng hạn mức. Tổng đã chi: <strong>{formatMoney(budget.totalSpent, c)}</strong></p>
+          <p className="muted">{t('Không đặt tổng hạn mức. Tổng đã chi:')} <strong>{formatMoney(budget.totalSpent, c)}</strong></p>
         </section>
       )}
 
       <section className="card">
-        <h2>Theo danh mục</h2>
-        {budget.categories.length === 0 && <p className="muted">Chưa đặt hạn mức theo danh mục.</p>}
+        <h2>{t('Theo danh mục')}</h2>
+        {budget.categories.length === 0 && <p className="muted">{t('Chưa đặt hạn mức theo danh mục.')}</p>}
         <ul className="budget-lines">
           {budget.categories.map((l) => (
             <li key={l.categoryId}>
@@ -102,36 +105,46 @@ function BudgetOverview({ budget }: { budget: BudgetOverviewDto }) {
           ))}
         </ul>
         {budget.unbudgetedSpent > 0 && (
-          <p className="muted small">Chi tiêu ở danh mục không đặt hạn mức: {formatMoney(budget.unbudgetedSpent, c)}</p>
+          <p className="muted small">{t('Chi tiêu ở danh mục không đặt hạn mức: {amount}', { amount: formatMoney(budget.unbudgetedSpent, c) })}</p>
         )}
-        <p className="muted small">Cảnh báo khi đạt {budget.alertThresholds.map((t) => `${t}%`).join(', ')} hạn mức.</p>
+        <p className="muted small">{t('Cảnh báo khi đạt {thresholds} hạn mức.', { thresholds: percentList(budget.alertThresholds, 'unit') })}</p>
       </section>
     </>
   )
 }
 
-function BudgetLine({ line, currency, thresholds, big }: { line: BudgetLineDto; currency: string; thresholds: number[]; big?: boolean }) {
+export function BudgetLine({ line, currency, thresholds, big }: { line: BudgetLineDto; currency: string; thresholds: number[]; big?: boolean }) {
   const over = line.remaining < 0
   return (
     <div className={big ? 'budget-line big' : 'budget-line'}>
       <div className="row-between">
         <span className="row">
           {!big && <span className="dot" style={{ background: line.color }} aria-hidden />}
-          <strong>{line.name}</strong>
-          {line.isArchived && <small className="muted">(đã lưu trữ)</small>}
+          {/* server sends its own labels for the total / deleted-category lines */}
+          <strong>{tx(line.name)}</strong>
+          {line.isArchived && <small className="muted">({t('đã lưu trữ')})</small>}
         </span>
-        <span className={over ? 'amount-expense' : undefined}>{line.percent.toLocaleString('vi-VN')}%</span>
+        <span className={over ? 'amount-expense' : undefined}>{line.percent.toLocaleString('en-US')}%</span>
       </div>
       <ProgressBar percent={line.percent} thresholds={thresholds} />
       <div className="row-between small">
-        <span className="muted">Đã chi {formatMoney(line.spent, currency)} / {formatMoney(line.limit, currency)}</span>
+        <span className="muted">{t('Đã chi {spent} / {limit}', { spent: formatMoney(line.spent, currency), limit: formatMoney(line.limit, currency) })}</span>
         <span className={over ? 'amount-expense' : 'muted'}>
-          {over ? `Vượt ${formatMoney(-line.remaining, currency)}` : `Còn lại ${formatMoney(line.remaining, currency)}`}
+          {over ? t('Vượt {amount}', { amount: formatMoney(-line.remaining, currency) }) : t('Còn lại {amount}', { amount: formatMoney(line.remaining, currency) })}
         </span>
       </div>
     </div>
   )
 }
+
+/** Vars for month keys: vi uses {m}/{y}, en uses the month name. */
+function monthVars(key: string) {
+  const d = parseMonthKey(key)!
+  return { m: d.getMonth() + 1, y: d.getFullYear(), month: d.toLocaleDateString(locale(), { month: 'long' }) }
+}
+
+const percentList = (values: number[], type: 'conjunction' | 'unit') =>
+  new Intl.ListFormat(locale(), { type }).format(values.map((v) => `${v}%`))
 
 const THRESHOLD_OPTIONS = [50, 70, 80, 90, 100]
 
@@ -154,16 +167,16 @@ function BudgetForm({ month, budget, onDone }: { month: string; budget: BudgetOv
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (total.trim() && (parsedTotal == null || parsedTotal <= 0)) return setError('Tổng hạn mức không hợp lệ.')
+    if (total.trim() && (parsedTotal == null || parsedTotal <= 0)) return setError(t('Tổng hạn mức không hợp lệ.'))
     const lines: { categoryId: string; limit: number }[] = []
     for (const [categoryId, raw] of Object.entries(limits)) {
       if (!raw.trim()) continue
       const n = parseAmount(raw, currency)
-      if (n == null || n <= 0) return setError('Hạn mức danh mục phải là số lớn hơn 0.')
+      if (n == null || n <= 0) return setError(t('Hạn mức danh mục phải là số lớn hơn 0.'))
       lines.push({ categoryId, limit: n })
     }
-    if (parsedTotal == null && lines.length === 0) return setError('Nhập tổng hạn mức hoặc ít nhất một hạn mức danh mục.')
-    if (thresholds.length === 0) return setError('Chọn ít nhất một ngưỡng cảnh báo.')
+    if (parsedTotal == null && lines.length === 0) return setError(t('Nhập tổng hạn mức hoặc ít nhất một hạn mức danh mục.'))
+    if (thresholds.length === 0) return setError(t('Chọn ít nhất một ngưỡng cảnh báo.'))
     try {
       await save.mutateAsync({ month, body: { totalLimit: parsedTotal, categories: lines, alertThresholds: thresholds } })
       onDone()
@@ -175,16 +188,16 @@ function BudgetForm({ month, budget, onDone }: { month: string; budget: BudgetOv
   return (
     <form onSubmit={submit} noValidate className="budget-form">
       <label className="field">
-        <span>Tổng hạn mức tháng (để trống nếu chỉ đặt theo danh mục)</span>
-        <AmountInput currency={currency} value={total} onChange={(e) => setTotal(e.target.value)} placeholder="VD: 10.000.000" autoFocus />
+        <span>{t('Tổng hạn mức tháng (để trống nếu chỉ đặt theo danh mục)')}</span>
+        <AmountInput currency={currency} value={total} onChange={(e) => setTotal(e.target.value)} placeholder={t('VD: 10,000,000')} autoFocus />
       </label>
 
       <fieldset className="fieldset">
-        <legend>Hạn mức theo danh mục chi</legend>
+        <legend>{t('Hạn mức theo danh mục chi')}</legend>
         <div className="limit-grid">
           {expense.map((c) => (
             <label key={c.id} className="limit-row">
-              <span className="row"><span className="dot" style={{ background: c.color }} aria-hidden />{c.name}</span>
+              <span className="row"><span className="dot" style={{ background: c.color }} aria-hidden />{tx(c.name)}</span>
               <AmountInput currency={currency} placeholder="—" value={limits[c.id] ?? ''}
                 onChange={(e) => setLimits((l) => ({ ...l, [c.id]: e.target.value }))} />
             </label>
@@ -192,18 +205,18 @@ function BudgetForm({ month, budget, onDone }: { month: string; budget: BudgetOv
         </div>
         {/* Supplement SUP-FI-04 */}
         {parsedTotal != null && categorySum > parsedTotal && (
-          <p className="warn small">Tổng hạn mức các danh mục ({formatMoney(categorySum, currency)}) lớn hơn tổng ngân sách.</p>
+          <p className="warn small">{t('Tổng hạn mức các danh mục ({amount}) lớn hơn tổng ngân sách.', { amount: formatMoney(categorySum, currency) })}</p>
         )}
       </fieldset>
 
       <fieldset className="fieldset">
-        <legend>Cảnh báo khi chi tiêu đạt</legend>
+        <legend>{t('Cảnh báo khi chi tiêu đạt')}</legend>
         <div className="row">
-          {THRESHOLD_OPTIONS.map((t) => (
-            <label key={t} className="check">
-              <input type="checkbox" checked={thresholds.includes(t)}
-                onChange={(e) => setThresholds((cur) => (e.target.checked ? [...cur, t].sort((a, b) => a - b) : cur.filter((x) => x !== t)))} />
-              {t}%
+          {THRESHOLD_OPTIONS.map((n) => (
+            <label key={n} className="check">
+              <input type="checkbox" checked={thresholds.includes(n)}
+                onChange={(e) => setThresholds((cur) => (e.target.checked ? [...cur, n].sort((a, b) => a - b) : cur.filter((x) => x !== n)))} />
+              {n}%
             </label>
           ))}
         </div>
@@ -211,8 +224,8 @@ function BudgetForm({ month, budget, onDone }: { month: string; budget: BudgetOv
 
       {error && <p className="form-error" role="alert">{error}</p>}
       <div className="modal-actions">
-        <button type="button" className="btn-ghost" onClick={onDone}>Hủy bỏ</button>
-        <button className="btn-primary" disabled={save.isPending}>{save.isPending ? 'Đang lưu…' : 'Lưu ngân sách'}</button>
+        <button type="button" className="btn-ghost" onClick={onDone}>{t('Hủy bỏ')}</button>
+        <button className="btn-primary" disabled={save.isPending}>{save.isPending ? t('Đang lưu…') : t('Lưu ngân sách')}</button>
       </div>
     </form>
   )

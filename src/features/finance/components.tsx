@@ -1,5 +1,6 @@
+import { t } from '../../i18n'
 import { forwardRef, useState, type InputHTMLAttributes } from 'react'
-import { formatAmountInput, parseAmount } from '../../lib/money'
+import { formatAmountInput, formatAmountTyping, parseAmount } from '../../lib/money'
 import { monthKeyOf, monthLabel, shiftMonth } from './queries'
 
 /** ‹ Tháng 11/2026 › with a native month picker. */
@@ -8,10 +9,10 @@ export function MonthSwitcher({ value, onChange }: { value: string; onChange: (m
   return (
     <div className="row month-switcher">
       <div className="btn-group">
-        <button className="btn-ghost" aria-label="Tháng trước" onClick={() => onChange(shiftMonth(value, -1))}>
+        <button className="btn-ghost" aria-label={t('Tháng trước')} onClick={() => onChange(shiftMonth(value, -1))}>
           ‹
         </button>
-        <button className="btn-ghost" aria-label="Tháng sau" onClick={() => onChange(shiftMonth(value, 1))}>
+        <button className="btn-ghost" aria-label={t('Tháng sau')} onClick={() => onChange(shiftMonth(value, 1))}>
           ›
         </button>
       </div>
@@ -21,13 +22,13 @@ export function MonthSwitcher({ value, onChange }: { value: string; onChange: (m
           type="month"
           className="input"
           value={value}
-          aria-label="Chọn tháng"
+          aria-label={t('Chọn tháng')}
           onChange={(e) => e.target.value && onChange(e.target.value)}
         />
       </label>
       {value !== current && (
         <button className="btn-link" onClick={() => onChange(current)}>
-          Tháng này
+          {t('Tháng này')}
         </button>
       )}
     </div>
@@ -35,11 +36,11 @@ export function MonthSwitcher({ value, onChange }: { value: string; onChange: (m
 }
 
 /**
- * Text input for money: accepts "1.250.000", "1250000", "12,5"; reformats on blur.
+ * Text input for money: shows thousand separators while typing ("1,250,000"); reformats on blur.
  * The form value is the raw string; parse with parseAmount on submit.
  */
 export const AmountInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { currency: string }>(
-  function AmountInput({ currency, onBlur, ...props }, ref) {
+  function AmountInput({ currency, onBlur, onChange, ...props }, ref) {
     return (
       <div className="amount-input">
         <input
@@ -47,6 +48,19 @@ export const AmountInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTML
           inputMode="decimal"
           autoComplete="off"
           {...props}
+          onChange={(e) => {
+            const el = e.target
+            const formatted = formatAmountTyping(el.value, currency)
+            if (formatted !== el.value) {
+              // Keep the caret after the same number of digits it was after before regrouping.
+              const keep = el.value.slice(0, el.selectionStart ?? el.value.length).replace(/[^\d.]/g, '').length
+              let pos = 0
+              for (let seen = 0; pos < formatted.length && seen < keep; pos++) if (formatted[pos] !== ',') seen++
+              el.value = formatted
+              el.setSelectionRange(pos, pos)
+            }
+            onChange?.(e)
+          }}
           onBlur={(e) => {
             const el = e.target
             const n = parseAmount(el.value, currency)
@@ -86,7 +100,7 @@ export function ColorSwatchPicker({ value, onChange }: { value: string; onChange
   const [custom, setCustom] = useState(false)
   const palette = ['#2f9e44', '#0c8599', '#1971c2', '#5f3dc4', '#9c36b5', '#c2255c', '#e03131', '#e8590c', '#f08c00', '#868e96']
   return (
-    <div className="swatches" role="radiogroup" aria-label="Màu">
+    <div className="swatches" role="radiogroup" aria-label={t('Màu')}>
       {palette.map((c) => (
         <button
           key={c}
@@ -99,7 +113,7 @@ export function ColorSwatchPicker({ value, onChange }: { value: string; onChange
           onClick={() => onChange(c)}
         />
       ))}
-      <label className={`swatch swatch-custom${custom ? ' selected' : ''}`} title="Màu khác">
+      <label className={`swatch swatch-custom${custom ? ' selected' : ''}`} title={t('Màu khác')}>
         <input
           type="color"
           value={value}

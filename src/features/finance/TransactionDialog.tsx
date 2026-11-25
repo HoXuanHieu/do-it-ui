@@ -1,3 +1,4 @@
+import { t, tx } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
@@ -5,7 +6,7 @@ import { z } from 'zod'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
 import { toDateKey } from '../../lib/dates'
-import type { CategoryDto, TransactionDto, TransactionType } from '../../lib/financeApi'
+import { JARS, type CategoryDto, type Jar, type TransactionDto, type TransactionType } from './api'
 import { applyServerErrors } from '../../lib/forms'
 import { formatAmountInput, parseAmount } from '../../lib/money'
 import { AmountInput } from './components'
@@ -18,13 +19,14 @@ export type TransactionDialogMode =
 /** Largest amount safely representable as a JS number with 2 decimals (backend allows more). */
 const MAX = 9_999_999_999_999
 
-function makeSchema(currency: string) {
+function makeSchema(currency: string, jarMode: boolean) {
   return z
     .object({
       type: z.enum(['Income', 'Expense']),
       amount: z.string(),
       categoryId: z.string().min(1, 'Chọn danh mục'),
       date: z.string().min(1, 'Chọn ngày'),
+      jar: z.string(),
       description: z.string().max(500, 'Tối đa 500 ký tự'),
       note: z.string().max(2000, 'Tối đa 2000 ký tự'),
     })
@@ -33,6 +35,7 @@ function makeSchema(currency: string) {
       // BR-FI-001
       if (n == null || n <= 0 || n > MAX)
         ctx.addIssue({ code: 'custom', path: ['amount'], message: 'Nhập số tiền lớn hơn 0 (tối đa 2 chữ số thập phân)' })
+      if (jarMode && v.type === 'Expense' && !v.jar) ctx.addIssue({ code: 'custom', path: ['jar'], message: 'Chọn hũ' })
     })
 }
 
@@ -41,14 +44,16 @@ type FormValues = z.infer<ReturnType<typeof makeSchema>>
 export function TransactionDialog({
   mode,
   currency,
+  jarMode,
   onClose,
 }: {
   mode: TransactionDialogMode | null
   currency: string
+  jarMode: boolean
   onClose: () => void
 }) {
   const title =
-    mode?.kind === 'edit' ? 'Sửa giao dịch' : mode?.type === 'Income' ? 'Thêm khoản thu' : 'Thêm khoản chi'
+    mode?.kind === 'edit' ? t('Sửa giao dịch') : mode?.type === 'Income' ? t('Thêm khoản thu') : t('Thêm khoản chi')
   return (
     <Modal open={!!mode} title={title} onClose={onClose}>
       {mode && (
@@ -56,6 +61,7 @@ export function TransactionDialog({
           key={mode.kind === 'edit' ? mode.tx.id : `${mode.type}-${mode.date ?? ''}`}
           mode={mode}
           currency={mode.kind === 'edit' ? mode.tx.currencyCode : currency}
+          jarMode={jarMode}
           onClose={onClose}
         />
       )}
@@ -63,7 +69,7 @@ export function TransactionDialog({
   )
 }
 
-function TransactionForm({ mode, currency, onClose }: { mode: TransactionDialogMode; currency: string; onClose: () => void }) {
+function TransactionForm({ mode, currency, jarMode, onClose }: { mode: TransactionDialogMode; currency: string; jarMode: boolean; onClose: () => void }) {
   const { data: categories = [] } = useCategories(true)
   const save = useSaveTransaction()
   const remove = useDeleteTransaction()
@@ -78,13 +84,14 @@ function TransactionForm({ mode, currency, onClose }: { mode: TransactionDialogM
           amount: formatAmountInput(mode.tx.amount, currency),
           categoryId: mode.tx.categoryId,
           date: mode.tx.date,
+          jar: mode.tx.jar ?? '',
           description: mode.tx.description ?? '',
           note: mode.tx.note ?? '',
         }
-      : { type: mode.type, amount: '', categoryId: '', date: mode.date ?? todayKey, description: '', note: '' }
+      : { type: mode.type, amount: '', categoryId: '', date: mode.date ?? todayKey, jar: '', description: '', note: '' }
 
   const { register, handleSubmit, setError, setValue, control, formState } = useForm<FormValues>({
-    resolver: zodResolver(makeSchema(currency)),
+    resolver: zodResolver(makeSchema(currency, jarMode)),
     defaultValues: initial,
   })
   const type = useWatch({ control, name: 'type' })
@@ -102,6 +109,8 @@ function TransactionForm({ mode, currency, onClose }: { mode: TransactionDialogM
           amount: parseAmount(v.amount, currency)!,
           categoryId: v.categoryId,
           date: v.date,
+          // Sent even outside jar mode so editing there keeps the jar already assigned.
+          jar: v.type === 'Expense' ? (v.jar as Jar) || null : null,
           description: v.description.trim() || null,
           note: v.note.trim() || null,
         },
@@ -114,73 +123,86 @@ function TransactionForm({ mode, currency, onClose }: { mode: TransactionDialogM
 
   return (
     <form onSubmit={onSubmit} noValidate className="form-grid tx-form">
-      <div className="segmented span-all type-toggle" role="radiogroup" aria-label="Loại giao dịch">
-        {(['Expense', 'Income'] as const).map((t) => (
+      <div className="segmented span-all type-toggle" role="radiogroup" aria-label={t('Loại giao dịch')}>
+        {(['Expense', 'Income'] as const).map((k) => (
           <button
-            key={t}
+            key={k}
             type="button"
             role="radio"
-            aria-checked={type === t}
-            className={type === t ? `active ${t === 'Income' ? 'income' : 'expense'}` : undefined}
+            aria-checked={type === k}
+            // Income/expense is fixed once created; only other fields are editable.
+            disabled={mode.kind === 'edit'}
+            className={type === k ? `active ${k === 'Income' ? 'income' : 'expense'}` : undefined}
             onClick={() => {
-              setValue('type', t)
+              setValue('type', k)
               setValue('categoryId', '')
             }}
           >
-            {t === 'Expense' ? 'Khoản chi' : 'Khoản thu'}
+            {k === 'Expense' ? t('Khoản chi') : t('Khoản thu')}
           </button>
         ))}
       </div>
 
-      <Field label="Số tiền" error={formState.errors.amount?.message}>
+      <Field label={t('Số tiền')} error={formState.errors.amount?.message}>
         <AmountInput currency={currency} autoFocus placeholder="0" {...register('amount')} />
       </Field>
-      <Field label="Ngày" error={formState.errors.date?.message}>
+      <Field label={t('Ngày')} error={formState.errors.date?.message}>
         <input type="date" {...register('date')} />
       </Field>
 
-      <Field label="Danh mục" error={formState.errors.categoryId?.message}>
+      <Field label={t('Danh mục')} error={formState.errors.categoryId?.message}>
         <select {...register('categoryId')}>
-          <option value="">— Chọn danh mục —</option>
+          <option value="">{t('— Chọn danh mục —')}</option>
           {options.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.name}
-              {c.isArchived ? ' (đã lưu trữ)' : ''}
+              {tx(c.name)}
+              {c.isArchived ? ` (${t('đã lưu trữ')})` : ''}
             </option>
           ))}
         </select>
       </Field>
-      <Field label="Mô tả" error={formState.errors.description?.message}>
-        <input maxLength={500} placeholder="VD: Ăn trưa, Grab…" {...register('description')} />
+      <Field label={t('Mô tả')} error={formState.errors.description?.message}>
+        <input maxLength={500} placeholder={t('VD: Ăn trưa, Grab…')} {...register('description')} />
       </Field>
 
+      {jarMode && type === 'Expense' && (
+        <Field label={t('Hũ')} error={formState.errors.jar?.message}>
+          <select {...register('jar')}>
+            <option value="">{t('— Chọn hũ —')}</option>
+            {Object.entries(JARS).map(([value, j]) => (
+              <option key={value} value={value}>{t(j.label)}</option>
+            ))}
+          </select>
+        </Field>
+      )}
+
       <div className="field span-all">
-        <span>Ghi chú</span>
+        <span>{t('Ghi chú')}</span>
         <textarea rows={2} maxLength={2000} {...register('note')} />
-        {formState.errors.note && <small className="field-error">{formState.errors.note.message}</small>}
+        {formState.errors.note && <small className="field-error">{tx(formState.errors.note.message ?? '')}</small>}
       </div>
 
       {formError && <p className="form-error span-all" role="alert">{formError}</p>}
       <div className="form-actions">
         {mode.kind === 'edit' && (
           <button type="button" className="btn-ghost danger" onClick={() => setConfirming(true)}>
-            Xóa
+            {t('Xóa')}
           </button>
         )}
         <span className="spacer" />
         <button type="button" className="btn-ghost" onClick={onClose}>
-          Hủy bỏ
+          {t('Hủy bỏ')}
         </button>
         <button className="btn-primary" disabled={formState.isSubmitting}>
-          {formState.isSubmitting ? 'Đang lưu…' : 'Lưu'}
+          {formState.isSubmitting ? t('Đang lưu…') : t('Lưu')}
         </button>
       </div>
 
       {mode.kind === 'edit' && (
         <ConfirmDialog
           open={confirming}
-          title="Xóa giao dịch?"
-          message="Giao dịch sẽ bị xóa khỏi lịch sử và các báo cáo."
+          title={t('Xóa giao dịch?')}
+          message={t('Giao dịch sẽ bị xóa khỏi lịch sử và các báo cáo.')}
           busy={remove.isPending}
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
