@@ -20,6 +20,8 @@ export const healthKeys = {
   measurements: (id: string) => ['health', 'measurements', id] as const,
   foods: (id: string, from: string, to: string) => ['health', 'foods', id, from, to] as const,
   workouts: (id: string, from: string, to: string) => ['health', 'workouts', id, from, to] as const,
+  /** Under 'foods' so a food write (which may add a new dish) refreshes it. */
+  dishes: ['health', 'foods', 'dishes'] as const,
 }
 
 /** All profiles of the user (at most 20): one list, detail pages read from it. */
@@ -60,6 +62,8 @@ export const useMeasurements = (id: string) =>
 
 export const useFoods = (id: string, from: string, to: string) =>
   useQuery({ queryKey: healthKeys.foods(id, from, to), queryFn: () => healthApi.foods(id, from, to) })
+
+export const useDishes = () => useQuery({ queryKey: healthKeys.dishes, queryFn: healthApi.dishes, staleTime: 5 * 60_000 })
 
 export const useWorkouts = (id: string, from: string, to: string) =>
   useQuery({ queryKey: healthKeys.workouts(id, from, to), queryFn: () => healthApi.workouts(id, from, to) })
@@ -152,3 +156,4 @@ export function parseNum(s: string): number | null {
   const n = Number(v)
   return Number.isFinite(n) ? n : null
 }
+

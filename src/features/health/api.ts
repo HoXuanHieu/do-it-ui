@@ -93,7 +93,20 @@ export interface FoodEntryDto {
   fatG: number | null
   isPlanned: boolean
 }
-export type FoodEntryInput = Omit<FoodEntryDto, 'id'>
+/** `category` is only used when the name is a new dish (it joins the shared catalog). */
+export type FoodEntryInput = Omit<FoodEntryDto, 'id'> & { category?: string }
+
+/** Shared dish catalog (all users); nutrition per 1 unit. */
+export interface DishDto {
+  id: string
+  name: string
+  category: string
+  unit: string
+  calories: number
+  proteinG: number | null
+  carbsG: number | null
+  fatG: number | null
+}
 
 export interface WorkoutDto {
   id: string
@@ -127,6 +140,7 @@ export const healthApi = {
   saveFood: (id: string, body: FoodEntryInput, foodId?: string) =>
     api<FoodEntryDto>(`${base(id)}/foods${foodId ? `/${foodId}` : ''}`, { method: foodId ? 'PUT' : 'POST', json: body }),
   removeFood: (id: string, foodId: string) => api<void>(`${base(id)}/foods/${foodId}`, { method: 'DELETE' }),
+  dishes: () => api<DishDto[]>('/health/dishes'),
 
   workouts: (id: string, from: string, to: string) => api<WorkoutDto[]>(`${base(id)}/workouts?from=${from}&to=${to}`),
   saveWorkout: (id: string, body: WorkoutInput, workoutId?: string) =>

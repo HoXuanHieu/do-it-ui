@@ -41,6 +41,9 @@
 
 .measure-form { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); align-items: end; margin: 0.75rem 0 0; }
 .measure-form input { width: 100%; min-width: 0; }
+.body-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 1rem; margin-bottom: 0.75rem; }
+.body-stats > div { display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+.body-stats strong { font-size: 1.4rem; }
 .health-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .health-table th, .health-table td { padding: 0.5rem 1.25rem; text-align: left; border-top: 1px solid var(--border); }
 .health-table th { color: var(--muted); font-weight: 500; }

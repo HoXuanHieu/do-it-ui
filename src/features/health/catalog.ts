@@ -1,7 +1,7 @@
 // Built-in suggestion content (no public food/exercise database in the MVP, SUP-HE-03).
 // Values are typical estimates per serving, not medical advice (SUP-HE-06).
 import type { Key } from '../../i18n'
-import type { ActivityLevel, BmiCategory, HealthCondition, HealthGoal, MealType } from './api'
+import type { ActivityLevel, BmiCategory, HealthCondition, HealthGoal, HealthProfileDto, MealType, MeasurementDto } from './api'
 
 export interface Dish {
   name: Key
@@ -153,4 +153,60 @@ export function suggestWeek(p: PlanInput, weekNumber: number): PlanDay[] {
     const met = exercises.length ? exercises.reduce((s, e) => s + e.met, 0) / exercises.length : 3
     return { weekday, focus, minutes, exercises, kcal: Math.round((met * p.weightKg * minutes) / 60) }
   })
+}
+
+// ---------- body composition estimates ----------
+
+export type FatLevel = 'Essential' | 'Athletic' | 'Fit' | 'Average' | 'High'
+
+export const FAT_LEVEL_LABEL: Record<FatLevel, Key> = {
+  Essential: 'Rất thấp',
+  Athletic: 'Vận động viên',
+  Fit: 'Cân đối',
+  Average: 'Trung bình',
+  High: 'Cao',
+}
+
+/** Full years between two YYYY-MM-DD keys. */
+export function ageOn(birth: string, day: string) {
+  const [by, bm, bd] = birth.split('-').map(Number)
+  const [y, m, d] = day.split('-').map(Number)
+  return y - by - (m < bm || (m === bm && d < bd) ? 1 : 0)
+}
+
+/**
+ * Estimates derived from one measurement (not a diagnosis):
+ * - BMI = kg / m².
+ * - Body fat %: the measured value if entered; else RFM from waist (Woolcott 2018, JAMA):
+ *   64 − 20 × height/waist (+12 for women); else from BMI (Deurenberg 1991):
+ *   1.2 × BMI + 0.23 × age − 10.8 × male − 5.4 (children: 1.51 × BMI − 0.7 × age − 3.6 × male + 1.4).
+ * - Waist-to-height ratio ≥ 0.5 = higher cardiometabolic risk.
+ * - Body-fat bands per American Council on Exercise.
+ */
+export function bodyStats(p: HealthProfileDto, m: MeasurementDto) {
+  const heightCm = m.heightCm ?? p.heightCm
+  const bmi = m.weightKg / (heightCm / 100) ** 2
+  const male = p.sex === 'Male' ? 1 : 0
+  const age = ageOn(p.birthDate, m.date)
+  const whtr = m.waistCm ? m.waistCm / heightCm : null
+  const [raw, fatSource]: [number, 'measured' | 'waist' | 'bmi'] =
+    m.bodyFatPercent != null ? [m.bodyFatPercent, 'measured']
+    : whtr ? [64 - 20 / whtr + 12 * (1 - male), 'waist']
+    : age < 18 ? [1.51 * bmi - 0.7 * age - 3.6 * male + 1.4, 'bmi']
+    : [1.2 * bmi + 0.23 * age - 10.8 * male - 5.4, 'bmi']
+  const fat = Math.min(70, Math.max(2, raw))
+  const fatKg = (m.weightKg * fat) / 100
+  const bands = male ? [6, 14, 18, 25] : [14, 21, 25, 32]
+  const levels: FatLevel[] = ['Essential', 'Athletic', 'Fit', 'Average', 'High']
+  return {
+    bmi,
+    // WHO Asia-Pacific cut-offs, same as the backend assessment
+    bmiCategory: (bmi < 18.5 ? 'Underweight' : bmi < 23 ? 'Normal' : bmi < 25 ? 'Overweight' : 'Obese') as BmiCategory,
+    whtr,
+    fat,
+    fatSource,
+    fatKg,
+    leanKg: m.weightKg - fatKg,
+    fatLevel: levels[bands.filter((b) => fat >= b).length],
+  }
 }
