@@ -15,6 +15,7 @@ import {
   useAddMeasurement, useDeleteProfile, useHealthProfiles, useMeasurements, useRemoveMeasurement, useUpdateProfile, withCheckIn,
 } from './queries'
 import { WorkoutTab } from './WorkoutTab'
+import { bodyStats, FAT_LEVEL_LABEL } from './catalog'
 
 const TABS: { value: string; label: Key }[] = [
   { value: 'overview', label: 'Đánh giá' },
@@ -23,11 +24,16 @@ const TABS: { value: string; label: Key }[] = [
   { value: 'progress', label: 'Theo dõi chỉ số' },
 ]
 
-/** Days since the latest measurement ≥ the check-in interval. */
-function checkInDue(p: HealthProfileDto) {
+/** Whole days since the latest measurement; null when there is none. */
+function daysSinceMeasured(p: HealthProfileDto) {
   const last = parseDateKey(p.latestMeasurement?.date)
-  if (!p.checkInEveryDays || !last) return false
-  return (startOfDay(new Date()).getTime() - last.getTime()) / DAY_MS >= p.checkInEveryDays
+  return last ? Math.round((startOfDay(new Date()).getTime() - last.getTime()) / DAY_MS) : null
+}
+
+/** Days since the latest measurement ≥ the check-in interval (same anchor as the server reminder). */
+function checkInDue(p: HealthProfileDto) {
+  const days = daysSinceMeasured(p)
+  return !!p.checkInEveryDays && days != null && days >= p.checkInEveryDays
 }
 
 /** /health/:id?tab=overview|nutrition|workouts|progress */
@@ -205,7 +211,8 @@ function ProgressTab({ p }: { p: HealthProfileDto }) {
 
   return (
     <div className="stack-lg">
-      <CheckInCard p={p} />
+      <CheckInCard key={p.checkInEveryDays ?? 0} p={p} />
+      {list[0] && <BodyStatsCard p={p} m={list[0]} fmt={fmt} />}
       <MeasurementForm p={p} />
       <section className="card">
         <h2>{t('Biểu đồ cân nặng')}</h2>
@@ -224,7 +231,7 @@ function ProgressTab({ p }: { p: HealthProfileDto }) {
               {list.map((m, i) => {
                 const prev = list[i + 1]
                 const diff = prev ? m.weightKg - prev.weightKg : 0
-                const h = (m.heightCm ?? p.heightCm) / 100
+                const s = bodyStats(p, m)
                 return (
                   <tr key={m.id}>
                     <td>{fmt(m.date)}</td>
@@ -232,8 +239,10 @@ function ProgressTab({ p }: { p: HealthProfileDto }) {
                       {num(m.weightKg)} kg{' '}
                       {diff !== 0 && <small className={diff > 0 ? 'delta-up' : 'delta-down'}>{diff > 0 ? '▲' : '▼'} {num(Math.abs(diff))}</small>}
                     </td>
-                    <td>{num(m.weightKg / (h * h))}</td>
-                    <td>{m.bodyFatPercent != null ? `${num(m.bodyFatPercent)}%` : '—'}</td>
+                    <td>{num(s.bmi)}</td>
+                    <td title={s.fatSource === 'measured' ? undefined : t('Ước tính')}>
+                      {s.fatSource === 'measured' ? '' : '~'}{num(s.fat)}%
+                    </td>
                     <td>{m.waistCm != null ? `${num(m.waistCm)} cm` : '—'}</td>
                     <td>
                       {list.length > 1 && (
@@ -257,10 +266,13 @@ function CheckInCard({ p }: { p: HealthProfileDto }) {
   const [days, setDays] = useState(p.checkInEveryDays ? String(p.checkInEveryDays) : '')
   const n = parseNum(days)
   const valid = !days.trim() || (n != null && Number.isInteger(n) && n >= 1 && n <= 365)
+  const unchanged = (n ?? null) === p.checkInEveryDays
+  const since = daysSinceMeasured(p)
   return (
     <section className={checkInDue(p) ? 'card health-due-card' : 'card'}>
       <h2>🔔 {t('Nhắc đánh giá lại chỉ số')}</h2>
       {checkInDue(p) && <p><strong>{t('Đã đến lúc đánh giá lại chỉ số cơ thể.')}</strong></p>}
+      {since != null && <p className="muted">{since === 0 ? t('Lần đo gần nhất: hôm nay.') : t('Lần đo gần nhất: {n} ngày trước.', { n: since })}</p>}
       <div className="row">
         <label className="row">
           {t('Nhắc tôi đo lại sau')}
@@ -270,7 +282,7 @@ function CheckInCard({ p }: { p: HealthProfileDto }) {
         {[7, 14, 30].map((d) => (
           <button key={d} type="button" className="goal-chip" onClick={() => setDays(String(d))}>{t('{n} ngày', { n: d })}</button>
         ))}
-        <button className="btn-primary btn-sm" disabled={!valid || update.isPending}
+        <button className="btn-primary btn-sm" disabled={!valid || unchanged || update.isPending}
           onClick={() => update.mutate({ id: p.id, body: withCheckIn(p, n && Math.round(n)) })}>
           {t('Lưu')}
         </button>
@@ -278,9 +290,57 @@ function CheckInCard({ p }: { p: HealthProfileDto }) {
       {!valid && <small className="field-error">{t('Nhập số ngày từ 1 đến 365, hoặc để trống để tắt.')}</small>}
       <small className="muted">
         {p.nextCheckInAt
-          ? t('Lần nhắc tiếp theo: {date}. Mỗi lần ghi chỉ số mới sẽ tính lại từ đầu.', { date: new Date(p.nextCheckInAt).toLocaleString(locale()) })
+          ? t('Lần nhắc tiếp theo: {date}. Tính từ ngày đo gần nhất, nhắc lúc 8:00 sáng.', {
+              date: new Date(p.nextCheckInAt).toLocaleString(locale(), { dateStyle: 'medium', timeStyle: 'short' }),
+            })
           : t('Đang tắt nhắc nhở.')}
       </small>
+    </section>
+  )
+}
+
+const FAT_SOURCE: Record<'measured' | 'waist' | 'bmi', Key> = {
+  measured: 'Số bạn nhập',
+  waist: 'Ước tính từ vòng eo và chiều cao (RFM)',
+  bmi: 'Ước tính từ BMI, tuổi, giới tính (Deurenberg) – nhập vòng eo để chính xác hơn',
+}
+
+/** Derived numbers from the latest measurement. */
+function BodyStatsCard({ p, m, fmt }: { p: HealthProfileDto; m: MeasurementDto; fmt: (k: string) => string }) {
+  const s = bodyStats(p, m)
+  return (
+    <section className="card">
+      <h2>{t('Chỉ số cơ thể ({date})', { date: fmt(m.date) })}</h2>
+      <div className="body-stats">
+        <div>
+          <small className="muted">BMI</small>
+          <strong>{num(s.bmi)}</strong>
+          <span className={`bmi-pill bmi-${s.bmiCategory.toLowerCase()}`}>{t(BMI_LABEL[s.bmiCategory])}</span>
+        </div>
+        <div>
+          <small className="muted">{t('Mỡ cơ thể')}</small>
+          <strong>{s.fatSource === 'measured' ? '' : '~'}{num(s.fat)}%</strong>
+          <span className="tag">{t(FAT_LEVEL_LABEL[s.fatLevel])}</span>
+        </div>
+        <div>
+          <small className="muted">{t('Khối mỡ')}</small>
+          <strong>{num(s.fatKg)} kg</strong>
+        </div>
+        <div>
+          <small className="muted">{t('Khối nạc (cơ, xương, nước)')}</small>
+          <strong>{num(s.leanKg)} kg</strong>
+        </div>
+        <div>
+          <small className="muted">{t('Vòng eo / chiều cao')}</small>
+          <strong>{s.whtr != null ? num(s.whtr, 2) : '—'}</strong>
+          {s.whtr != null && (
+            <span className={s.whtr >= 0.5 ? 'bmi-pill bmi-overweight' : 'bmi-pill bmi-normal'}>
+              {s.whtr >= 0.5 ? t('Nên giảm vòng eo') : t('Tốt')}
+            </span>
+          )}
+        </div>
+      </div>
+      <small className="muted">{t('Mỡ cơ thể:')} {t(FAT_SOURCE[s.fatSource])}. {t('Vòng eo nên nhỏ hơn một nửa chiều cao.')}</small>
     </section>
   )
 }

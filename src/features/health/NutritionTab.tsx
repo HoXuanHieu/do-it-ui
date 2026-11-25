@@ -5,8 +5,8 @@ import { Field } from '../../components/Form'
 import { addDays, DAY_MS, parseDateKey, toDateKey, weekdayName } from '../../lib/dates'
 import { applyServerErrors } from '../../lib/forms'
 import type { FoodEntryDto, FoodEntryInput, HealthProfileDto, MealType } from './api'
-import { DISHES, suggestMenu } from './catalog'
-import { MEALS, num, parseNum, useFoods, useRemoveFood, useSaveFood } from './queries'
+import { suggestMenu } from './catalog'
+import { MEALS, num, parseNum, useDishes, useFoods, useRemoveFood, useSaveFood } from './queries'
 
 const sum = (list: FoodEntryDto[], f: (e: FoodEntryDto) => number | null) => list.reduce((s, e) => s + (f(e) ?? 0), 0)
 
@@ -188,27 +188,32 @@ function FoodForm({ state, day, profileId, onClose }: {
     meal: state.meal, name: e?.name ?? '', quantity: str(e?.quantity ?? 1), unit: e?.unit ?? t('phần'),
     calories: str(e?.calories), protein: str(e?.proteinG), carbs: str(e?.carbsG), fat: str(e?.fatG), isPlanned: e?.isPlanned ?? false,
   })
+  const [category, setCategory] = useState('')
   const [error, setError] = useState('')
   const set = (k: keyof typeof v) => (ev: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setV({ ...v, [k]: ev.target.value })
 
-  const pick = (name: string) => {
-    const d = DISHES.find((x) => t(x.name) === name)
-    if (d) setV({ ...v, name, quantity: '1', unit: t(d.unit), calories: String(d.kcal), protein: String(d.p), carbs: String(d.c), fat: String(d.f) })
-    else setV({ ...v, name })
-  }
+  // Catalog dish: nutrition comes from the shared catalog × quantity (the server recomputes it the same way).
+  const { data: dishes = [] } = useDishes()
+  const dish = dishes.find((d) => d.name.toLowerCase() === v.name.trim().toLowerCase())
+  const q = parseNum(v.quantity) ?? 0
+  const scaled = (n: number | null) => (n == null ? '' : String(Math.round(n * q * 10) / 10))
+  const shown = dish
+    ? { ...v, unit: dish.unit, calories: String(Math.round(dish.calories * q)), protein: scaled(dish.proteinG), carbs: scaled(dish.carbsG), fat: scaled(dish.fatG) }
+    : v
+  const categories = [...new Set(dishes.map((d) => d.category))]
 
   const submit = async (ev: React.FormEvent) => {
     ev.preventDefault()
-    const quantity = parseNum(v.quantity), calories = parseNum(v.calories)
-    const macros = [v.protein, v.carbs, v.fat].map(parseNum)
+    const quantity = parseNum(shown.quantity), calories = parseNum(shown.calories)
+    const macros = [shown.protein, shown.carbs, shown.fat].map(parseNum)
     if (!v.name.trim()) return setError(t('Nhập tên món.'))
     if (quantity == null || quantity <= 0) return setError(t('Số lượng phải lớn hơn 0.'))
-    if (!v.unit.trim()) return setError(t('Nhập đơn vị.'))
+    if (!shown.unit.trim()) return setError(t('Nhập đơn vị.'))
     if (calories == null || calories < 0) return setError(t('Calo không được âm.'))
     if (macros.some((m) => m != null && m < 0)) return setError(t('Đạm, tinh bột, chất béo không được âm.'))
     const body: FoodEntryInput = {
-      date: e?.date ?? day, meal: v.meal, name: v.name.trim(), quantity, unit: v.unit.trim(), calories: Math.round(calories),
-      proteinG: macros[0], carbsG: macros[1], fatG: macros[2], isPlanned: v.isPlanned,
+      date: e?.date ?? day, meal: v.meal, name: dish?.name ?? v.name.trim(), quantity, unit: shown.unit.trim(), calories: Math.round(calories),
+      proteinG: macros[0], carbsG: macros[1], fatG: macros[2], isPlanned: v.isPlanned, category: category.trim() || undefined,
     }
     try {
       await save.mutateAsync({ id: e?.id, body })
@@ -221,20 +226,31 @@ function FoodForm({ state, day, profileId, onClose }: {
   return (
     <form className="form-grid" onSubmit={(ev) => void submit(ev)} noValidate>
       <Field label={t('Tên món')}>
-        <input autoFocus list="dish-list" maxLength={200} value={v.name} onChange={(ev) => pick(ev.target.value)} placeholder={t('Gõ hoặc chọn món gợi ý')} />
-        <datalist id="dish-list">{DISHES.map((d) => <option key={d.name} value={t(d.name)} />)}</datalist>
+        <input autoFocus list="dish-list" maxLength={200} value={v.name} onChange={set('name')} placeholder={t('Gõ hoặc chọn món gợi ý')} />
+        <datalist id="dish-list">{dishes.map((d) => <option key={d.id} value={d.name}>{d.category}</option>)}</datalist>
       </Field>
       <Field label={t('Bữa')}>
         <select value={v.meal} onChange={set('meal')}>
           {MEALS.map((m) => <option key={m.value} value={m.value}>{t(m.label)}</option>)}
         </select>
       </Field>
+      {v.name.trim() && (
+        <p className="muted span-all">
+          {dish
+            ? t('Món có sẵn: {kcal} kcal / 1 {unit}. Chỉ cần chỉnh số lượng, hệ thống tự tính lại.', { kcal: num(dish.calories), unit: dish.unit })
+            : t('Món mới: sẽ được thêm vào danh sách món dùng chung cho mọi người.')}
+        </p>
+      )}
+      <Field label={t('Danh mục')}>
+        <input list="dish-categories" maxLength={50} value={dish ? dish.category : category} readOnly={!!dish} onChange={(ev) => setCategory(ev.target.value)} />
+        <datalist id="dish-categories">{categories.map((c) => <option key={c} value={c} />)}</datalist>
+      </Field>
       <Field label={t('Số lượng')}><input inputMode="decimal" value={v.quantity} onChange={set('quantity')} /></Field>
-      <Field label={t('Đơn vị')}><input maxLength={30} value={v.unit} onChange={set('unit')} placeholder={t('g, bát, phần…')} /></Field>
-      <Field label={t('Calo (kcal)')}><input inputMode="numeric" value={v.calories} onChange={set('calories')} /></Field>
-      <Field label={t('Đạm (g)')} hint={t('Không bắt buộc')}><input inputMode="decimal" value={v.protein} onChange={set('protein')} /></Field>
-      <Field label={t('Tinh bột (g)')} hint={t('Không bắt buộc')}><input inputMode="decimal" value={v.carbs} onChange={set('carbs')} /></Field>
-      <Field label={t('Chất béo (g)')} hint={t('Không bắt buộc')}><input inputMode="decimal" value={v.fat} onChange={set('fat')} /></Field>
+      <Field label={t('Đơn vị')}><input maxLength={30} value={shown.unit} readOnly={!!dish} onChange={set('unit')} placeholder={t('g, bát, phần…')} /></Field>
+      <Field label={t('Calo (kcal)')}><input inputMode="numeric" value={shown.calories} readOnly={!!dish} onChange={set('calories')} /></Field>
+      <Field label={t('Đạm (g)')} hint={t('Không bắt buộc')}><input inputMode="decimal" value={shown.protein} readOnly={!!dish} onChange={set('protein')} /></Field>
+      <Field label={t('Tinh bột (g)')} hint={t('Không bắt buộc')}><input inputMode="decimal" value={shown.carbs} readOnly={!!dish} onChange={set('carbs')} /></Field>
+      <Field label={t('Chất béo (g)')} hint={t('Không bắt buộc')}><input inputMode="decimal" value={shown.fat} readOnly={!!dish} onChange={set('fat')} /></Field>
       <label className="check span-all">
         <input type="checkbox" checked={v.isPlanned} onChange={(ev) => setV({ ...v, isPlanned: ev.target.checked })} />
         {t('Chỉ là kế hoạch (chưa ăn)')}

@@ -26,23 +26,28 @@ export function HealthPage() {
         <button className="btn-primary" onClick={() => setCreating(true)}>{t('+ Hồ sơ mới')}</button>
       </header>
 
-      {isPending && <p className="muted">{t('Đang tải…')}</p>}
-      {isError && <p className="form-error">{t('Không tải được hồ sơ sức khỏe.')}</p>}
+      <div className="health-split">
+        <div className="health-main">
+          {isPending && <p className="muted">{t('Đang tải…')}</p>}
+          {isError && <p className="form-error">{t('Không tải được hồ sơ sức khỏe.')}</p>}
 
-      {profiles?.length === 0 && (
-        <section className="card health-empty">
-          <div aria-hidden className="health-empty-icon">🩺</div>
-          <h2>{t('Tạo hồ sơ sức khỏe đầu tiên')}</h2>
-          <p className="muted">{t('Nhập chiều cao, cân nặng, mức vận động và mục tiêu để nhận đánh giá, gợi ý ăn uống và lịch tập phù hợp.')}</p>
-          <button className="btn-primary" onClick={() => setCreating(true)}>{t('Tạo hồ sơ')}</button>
-        </section>
-      )}
+          {profiles?.length === 0 && (
+            <section className="card health-empty">
+              <div aria-hidden className="health-empty-icon">🩺</div>
+              <h2>{t('Tạo hồ sơ sức khỏe đầu tiên')}</h2>
+              <p className="muted">{t('Nhập chiều cao, cân nặng, mức vận động và mục tiêu để nhận đánh giá, gợi ý ăn uống và lịch tập phù hợp.')}</p>
+              <button className="btn-primary" onClick={() => setCreating(true)}>{t('Tạo hồ sơ')}</button>
+            </section>
+          )}
 
-      <div className="health-grid">
-        {profiles?.map((p) => <ProfileCard key={p.id} p={p} />)}
+          <div className="health-grid">
+            {profiles?.map((p) => <ProfileCard key={p.id} p={p} />)}
+          </div>
+        </div>
+        <aside className="health-side">
+          <MedicationCard />
+        </aside>
       </div>
-
-      <MedicationCard />
 
       <Disclaimer />
       <ProfileFormDialog open={creating} onClose={() => setCreating(false)} onSaved={(p) => navigate(`/health/${p.id}`)} />
