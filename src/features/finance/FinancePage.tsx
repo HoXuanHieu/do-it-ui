@@ -1,3 +1,4 @@
+import { t } from '../../i18n'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { BudgetTab } from './BudgetTab'
@@ -16,11 +17,11 @@ export function FinancePage() {
   const jarMode = useJars(month).data?.enabled ?? false
   const setJarMode = useSetJarMode()
   const tabs = [
-    { value: 'transactions', label: 'Giao dịch' },
-    jarMode ? { value: 'jars', label: '6 hũ' } : { value: 'budget', label: 'Ngân sách' },
-    { value: 'categories', label: 'Danh mục' },
+    { value: 'transactions', label: t('Giao dịch') },
+    jarMode ? { value: 'jars', label: t('6 hũ') } : { value: 'budget', label: t('Ngân sách') },
+    { value: 'categories', label: t('Danh mục|tab') },
   ]
-  const tab = tabs.some((t) => t.value === params.get('tab')) ? params.get('tab') : 'transactions'
+  const tab = tabs.some((x) => x.value === params.get('tab')) ? params.get('tab') : 'transactions'
 
   const update = (patch: Record<string, string>) => {
     const next = new URLSearchParams(params)
@@ -31,7 +32,7 @@ export function FinancePage() {
   return (
     <>
       <header className="page-header row-between wrap">
-        <h1>Tài chính</h1>
+        <h1>{t('Tài chính')}</h1>
         <label className="check">
           <input
             type="checkbox"
@@ -43,14 +44,14 @@ export function FinancePage() {
               setJarMode.mutate(on, { onSuccess: () => update({ tab: on ? 'jars' : 'budget' }) })
             }}
           />
-          Quản lý theo 6 hũ
+          {t('Quản lý theo 6 hũ')}
         </label>
       </header>
-      <nav className="tabs" role="tablist" aria-label="Tài chính">
-        {tabs.map((t) => (
-          <button key={t.value} role="tab" aria-selected={tab === t.value} className={tab === t.value ? 'active' : undefined}
-            onClick={() => update({ tab: t.value })}>
-            {t.label}
+      <nav className="tabs" role="tablist" aria-label={t('Tài chính')}>
+        {tabs.map((x) => (
+          <button key={x.value} role="tab" aria-selected={tab === x.value} className={tab === x.value ? 'active' : undefined}
+            onClick={() => update({ tab: x.value })}>
+            {x.label}
           </button>
         ))}
       </nav>

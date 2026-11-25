@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { setLanguage } from '../../i18n'
 import { preferencesApi, profileApi, type PreferencesDto, type ProfileDto } from './api'
 
 export const keys = {
@@ -59,5 +60,13 @@ export function useThemeSync() {
     const root = document.documentElement
     if (!data || data.theme === 'System') delete root.dataset.theme
     else root.dataset.theme = data.theme.toLowerCase()
+  }, [data])
+}
+
+/** Apply the language preference; the app root re-renders on change. */
+export function useLanguageSync() {
+  const { data } = usePreferences()
+  useEffect(() => {
+    if (data) void setLanguage(data.language)
   }, [data])
 }

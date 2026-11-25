@@ -1,8 +1,10 @@
+import { t, type Key } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Field } from '../../components/Form'
+import { ApiError } from '../../lib/api'
 import { applyServerErrors, PASSWORD_HINT } from '../../lib/forms'
 import { authApi } from './api'
 import { useAuth } from './AuthContext'
@@ -46,29 +48,31 @@ export function LoginPage() {
       const from = (location.state as { from?: string } | null)?.from ?? '/'
       navigate(from, { replace: true })
     } catch (e) {
-      setFormError(applyServerErrors(e, setError))
+      // Email existence is checked first server-side, so 401 here means wrong password.
+      if (e instanceof ApiError && e.status === 401) setError('password', { message: 'Mật khẩu không đúng.' satisfies Key })
+      else setFormError(applyServerErrors(e, setError))
     }
   })
 
   return (
-    <AuthCard title="Đăng nhập" subtitle="Quản lý thời gian, sức khỏe và tài chính của bạn.">
+    <AuthCard title={t('Đăng nhập')} subtitle={t('Quản lý thời gian, sức khỏe và tài chính của bạn.')}>
       <form onSubmit={onSubmit} noValidate>
         <Field label="Email" error={formState.errors.email?.message}>
           <input type="email" autoComplete="email" {...register('email')} />
         </Field>
-        <Field label="Mật khẩu" error={formState.errors.password?.message}>
+        <Field label={t('Mật khẩu')} error={formState.errors.password?.message}>
           <input type="password" autoComplete="current-password" {...register('password')} />
         </Field>
         <Link to="/forgot-password" className="small-link">
-          Quên mật khẩu?
+          {t('Quên mật khẩu?')}
         </Link>
         {formError && <p className="form-error" role="alert">{formError}</p>}
         <button className="btn-primary" disabled={formState.isSubmitting}>
-          {formState.isSubmitting ? 'Đang đăng nhập…' : 'Đăng nhập'}
+          {formState.isSubmitting ? t('Đang đăng nhập…') : t('Đăng nhập')}
         </button>
       </form>
       <p className="muted center">
-        Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
+        {t('Chưa có tài khoản?')} <Link to="/register">{t('Đăng ký')}</Link>
       </p>
     </AuthCard>
   )
@@ -95,27 +99,27 @@ export function RegisterPage() {
   })
 
   return (
-    <AuthCard title="Tạo tài khoản" subtitle="Bắt đầu sắp xếp cuộc sống của bạn với DO-IT.">
+    <AuthCard title={t('Tạo tài khoản')} subtitle={t('Bắt đầu sắp xếp cuộc sống của bạn với DO-IT.')}>
       <form onSubmit={onSubmit} noValidate>
-        <Field label="Họ tên (không bắt buộc)" error={formState.errors.fullName?.message}>
+        <Field label={t('Họ tên (không bắt buộc)')} error={formState.errors.fullName?.message}>
           <input autoComplete="name" {...register('fullName')} />
         </Field>
         <Field label="Email" error={formState.errors.email?.message}>
           <input type="email" autoComplete="email" {...register('email')} />
         </Field>
-        <Field label="Mật khẩu" error={formState.errors.password?.message} hint={PASSWORD_HINT}>
+        <Field label={t('Mật khẩu')} error={formState.errors.password?.message} hint={t(PASSWORD_HINT)}>
           <input type="password" autoComplete="new-password" {...register('password')} />
         </Field>
-        <Field label="Xác nhận mật khẩu" error={formState.errors.confirmPassword?.message}>
+        <Field label={t('Xác nhận mật khẩu')} error={formState.errors.confirmPassword?.message}>
           <input type="password" autoComplete="new-password" {...register('confirmPassword')} />
         </Field>
         {formError && <p className="form-error" role="alert">{formError}</p>}
         <button className="btn-primary" disabled={formState.isSubmitting}>
-          {formState.isSubmitting ? 'Đang tạo tài khoản…' : 'Đăng ký'}
+          {formState.isSubmitting ? t('Đang tạo tài khoản…') : t('Đăng ký')}
         </button>
       </form>
       <p className="muted center">
-        Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+        {t('Đã có tài khoản?')} <Link to="/login">{t('Đăng nhập')}</Link>
       </p>
     </AuthCard>
   )
@@ -139,10 +143,10 @@ export function ForgotPasswordPage() {
   })
 
   return (
-    <AuthCard title="Quên mật khẩu" subtitle="Nhập email đã đăng ký, chúng tôi sẽ gửi liên kết đặt lại mật khẩu.">
+    <AuthCard title={t('Quên mật khẩu')} subtitle={t('Nhập email đã đăng ký, chúng tôi sẽ gửi liên kết đặt lại mật khẩu.')}>
       {sentTo ? (
         <p className="notice" role="status">
-          Nếu <strong>{sentTo}</strong> đã được đăng ký, bạn sẽ nhận được email trong vài phút. Liên kết có hiệu lực 1 giờ.
+          {t('Nếu')} <strong>{sentTo}</strong> {t('đã được đăng ký, bạn sẽ nhận được email trong vài phút. Liên kết có hiệu lực 1 giờ.')}
         </p>
       ) : (
         <form onSubmit={onSubmit} noValidate>
@@ -151,12 +155,12 @@ export function ForgotPasswordPage() {
           </Field>
           {formError && <p className="form-error" role="alert">{formError}</p>}
           <button className="btn-primary" disabled={formState.isSubmitting}>
-            {formState.isSubmitting ? 'Đang gửi…' : 'Gửi liên kết'}
+            {formState.isSubmitting ? t('Đang gửi…') : t('Gửi liên kết')}
           </button>
         </form>
       )}
       <p className="muted center">
-        <Link to="/login">Quay lại đăng nhập</Link>
+        <Link to="/login">{t('Quay lại đăng nhập')}</Link>
       </p>
     </AuthCard>
   )
@@ -186,36 +190,36 @@ export function ResetPasswordPage() {
   const invalidLink = !userId || !token
 
   return (
-    <AuthCard title="Đặt lại mật khẩu" subtitle="Chọn mật khẩu mới cho tài khoản của bạn.">
+    <AuthCard title={t('Đặt lại mật khẩu')} subtitle={t('Chọn mật khẩu mới cho tài khoản của bạn.')}>
       {done ? (
         <p className="notice" role="status">
-          Mật khẩu đã được đặt lại. Mọi phiên đăng nhập cũ đã bị đăng xuất. <Link to="/login">Đăng nhập ngay</Link>
+          {t('Mật khẩu đã được đặt lại. Mọi phiên đăng nhập cũ đã bị đăng xuất.')} <Link to="/login">{t('Đăng nhập ngay')}</Link>
         </p>
       ) : invalidLink ? (
         <p className="form-error" role="alert">
-          Liên kết không hợp lệ. <Link to="/forgot-password">Yêu cầu liên kết mới</Link>
+          {t('Liên kết không hợp lệ.')} <Link to="/forgot-password">{t('Yêu cầu liên kết mới')}</Link>
         </p>
       ) : (
         <form onSubmit={onSubmit} noValidate>
-          <Field label="Mật khẩu mới" error={formState.errors.newPassword?.message} hint={PASSWORD_HINT}>
+          <Field label={t('Mật khẩu mới')} error={formState.errors.newPassword?.message} hint={t(PASSWORD_HINT)}>
             <input type="password" autoComplete="new-password" {...register('newPassword')} />
           </Field>
-          <Field label="Xác nhận mật khẩu" error={formState.errors.confirmPassword?.message}>
+          <Field label={t('Xác nhận mật khẩu')} error={formState.errors.confirmPassword?.message}>
             <input type="password" autoComplete="new-password" {...register('confirmPassword')} />
           </Field>
           {formError && (
             <p className="form-error" role="alert">
-              {formError} <Link to="/forgot-password">Yêu cầu liên kết mới</Link>
+              {formError} <Link to="/forgot-password">{t('Yêu cầu liên kết mới')}</Link>
             </p>
           )}
           <button className="btn-primary" disabled={formState.isSubmitting}>
-            {formState.isSubmitting ? 'Đang lưu…' : 'Đặt lại mật khẩu'}
+            {formState.isSubmitting ? t('Đang lưu…') : t('Đặt lại mật khẩu')}
           </button>
         </form>
       )}
       {!done && (
         <p className="muted center">
-          <Link to="/login">Quay lại đăng nhập</Link>
+          <Link to="/login">{t('Quay lại đăng nhập')}</Link>
         </p>
       )}
     </AuthCard>

@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { useEffect, useRef, type ReactNode } from 'react'
 
 /** Accessible modal on top of the native <dialog> (focus trap, Esc to close, backdrop). */
@@ -19,7 +20,11 @@ export function Modal({
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    if (open && !el.open) el.showModal()
+    if (open && !el.open) {
+      el.showModal()
+      // showModal() focuses the close button; React's autoFocus is not an HTML attribute, so re-apply it.
+      el.querySelector<HTMLElement>('form input:not([type=hidden]), form textarea, form select')?.focus()
+    }
     if (!open && el.open) el.close()
   }, [open])
 
@@ -38,7 +43,7 @@ export function Modal({
         <div className="modal-panel">
           <header className="modal-header">
             <h2>{title}</h2>
-            <button type="button" className="icon-btn" aria-label="Đóng" onClick={onClose}>
+            <button type="button" className="icon-btn" aria-label={t('Đóng')} onClick={onClose}>
               ×
             </button>
           </header>
@@ -54,7 +59,7 @@ export function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = 'Xóa',
+  confirmLabel,
   busy,
   onConfirm,
   onCancel,
@@ -72,10 +77,10 @@ export function ConfirmDialog({
       <p>{message}</p>
       <div className="modal-actions">
         <button type="button" className="btn-ghost" onClick={onCancel} disabled={busy}>
-          Hủy bỏ
+          {t('Hủy bỏ')}
         </button>
         <button type="button" className="btn-danger" onClick={onConfirm} disabled={busy}>
-          {busy ? 'Đang xử lý…' : confirmLabel}
+          {busy ? t('Đang xử lý…') : (confirmLabel ?? t('Xóa'))}
         </button>
       </div>
     </Modal>
