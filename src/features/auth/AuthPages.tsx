@@ -3,9 +3,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { Field } from '../../components/Form'
+import { Field, PasswordInput } from '../../components/Form'
 import { ApiError } from '../../lib/api'
 import { applyServerErrors, PASSWORD_HINT } from '../../lib/forms'
+import { LegalLinks } from '../legal/LegalPage'
 import { authApi } from './api'
 import { useAuth } from './AuthContext'
 import {
@@ -27,6 +28,7 @@ function AuthCard({ title, subtitle, children }: { title: string; subtitle: stri
         <h1>{title}</h1>
         <p className="muted">{subtitle}</p>
         {children}
+        <LegalLinks />
       </section>
     </main>
   )
@@ -61,7 +63,7 @@ export function LoginPage() {
           <input type="email" autoComplete="email" {...register('email')} />
         </Field>
         <Field label={t('Mật khẩu')} error={formState.errors.password?.message}>
-          <input type="password" autoComplete="current-password" {...register('password')} />
+          <PasswordInput autoComplete="current-password" {...register('password')} />
         </Field>
         <Link to="/forgot-password" className="small-link">
           {t('Quên mật khẩu?')}
@@ -108,15 +110,19 @@ export function RegisterPage() {
           <input type="email" autoComplete="email" {...register('email')} />
         </Field>
         <Field label={t('Mật khẩu')} error={formState.errors.password?.message} hint={t(PASSWORD_HINT)}>
-          <input type="password" autoComplete="new-password" {...register('password')} />
+          <PasswordInput autoComplete="new-password" {...register('password')} />
         </Field>
         <Field label={t('Xác nhận mật khẩu')} error={formState.errors.confirmPassword?.message}>
-          <input type="password" autoComplete="new-password" {...register('confirmPassword')} />
+          <PasswordInput autoComplete="new-password" {...register('confirmPassword')} />
         </Field>
         {formError && <p className="form-error" role="alert">{formError}</p>}
         <button className="btn-primary" disabled={formState.isSubmitting}>
           {formState.isSubmitting ? t('Đang tạo tài khoản…') : t('Đăng ký')}
         </button>
+        <p className="muted small">
+          {t('Bằng việc đăng ký, bạn đồng ý với')} <Link to="/terms">{t('Điều khoản sử dụng')}</Link> {t('và')}{' '}
+          <Link to="/privacy">{t('Chính sách quyền riêng tư')}</Link>.
+        </p>
       </form>
       <p className="muted center">
         {t('Đã có tài khoản?')} <Link to="/login">{t('Đăng nhập')}</Link>
@@ -202,10 +208,10 @@ export function ResetPasswordPage() {
       ) : (
         <form onSubmit={onSubmit} noValidate>
           <Field label={t('Mật khẩu mới')} error={formState.errors.newPassword?.message} hint={t(PASSWORD_HINT)}>
-            <input type="password" autoComplete="new-password" {...register('newPassword')} />
+            <PasswordInput autoComplete="new-password" {...register('newPassword')} />
           </Field>
           <Field label={t('Xác nhận mật khẩu')} error={formState.errors.confirmPassword?.message}>
-            <input type="password" autoComplete="new-password" {...register('confirmPassword')} />
+            <PasswordInput autoComplete="new-password" {...register('confirmPassword')} />
           </Field>
           {formError && (
             <p className="form-error" role="alert">

@@ -1,6 +1,7 @@
 import { locale, t } from '../../i18n'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { NavIcon } from '../../components/NavIcon'
 import { useAuth } from '../auth/AuthContext'
 import { eventsOnDay } from '../calendar/layout'
 import { categoryClass, STATUS_LABEL } from '../calendar/meta'
@@ -24,7 +25,7 @@ export function DashboardPage() {
         <p className="muted">{todayLabel}</p>
       </header>
       {/* FR-DASH-001: remaining widgets are wired up as their modules land (Sprint 3–6). */}
-      <div className="grid">
+      <div className="grid dash-grid">
         <TodaySchedule day={today} />
         <FinanceToday day={today} />
         <MonthBudget day={today} />
@@ -50,8 +51,8 @@ function TodaySchedule({ day }: { day: Date }) {
     <section className="card today-card">
       <div className="row-between">
         <h2>{t('Lịch hôm nay')}</h2>
-        <Link to={`/calendar?view=day&date=${toDateKey(day)}`} className="small">
-          {t('Xem lịch →')}
+        <Link to={`/calendar?view=day&date=${toDateKey(day)}`} className="icon-btn" aria-label={t('Xem lịch')} title={t('Xem lịch')}>
+          <NavIcon name="arrowRight" />
         </Link>
       </div>
       {isPending && <p className="muted">{t('Đang tải…')}</p>}
@@ -85,7 +86,9 @@ function FinanceToday({ day }: { day: Date }) {
     <section className="card dash-finance">
       <div className="row-between">
         <h2>{t('Tài chính')}</h2>
-        <Link to="/finance" className="small">{t('Giao dịch →')}</Link>
+        <Link to="/finance" className="icon-btn" aria-label={t('Giao dịch')} title={t('Giao dịch')}>
+          <NavIcon name="arrowRight" />
+        </Link>
       </div>
       {(today.isError || month.isError) && <p className="form-error">{t('Không tải được dữ liệu.')}</p>}
       <dl>
@@ -111,7 +114,9 @@ function MonthBudget({ day }: { day: Date }) {
     <section className="card dash-finance">
       <div className="row-between">
         <h2>{t('Ngân sách tháng')}</h2>
-        <Link to={`/finance?tab=budget&month=${month}`} className="small">{t('Chi tiết →')}</Link>
+        <Link to={`/finance?tab=budget&month=${month}`} className="icon-btn" aria-label={t('Chi tiết')} title={t('Chi tiết')}>
+          <NavIcon name="arrowRight" />
+        </Link>
       </div>
       {isPending && <p className="muted">{t('Đang tải…')}</p>}
       {isError && <p className="form-error">{t('Không tải được ngân sách.')}</p>}
@@ -144,8 +149,8 @@ function GoalsToday() {
     <section className="card dash-goals">
       <div className="row-between">
         <h2>{t('Mục tiêu')}</h2>
-        <Link to="/goals" className="small">
-          {t('Xem tất cả →')}
+        <Link to="/goals" className="icon-btn" aria-label={t('Xem tất cả')} title={t('Xem tất cả')}>
+          <NavIcon name="arrowRight" />
         </Link>
       </div>
       {isPending && <p className="muted">{t('Đang tải…')}</p>}

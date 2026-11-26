@@ -6,6 +6,7 @@ import { ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage } from '
 import { AppLayout } from '../layouts/AppLayout'
 import { DashboardPage } from '../features/dashboard/DashboardPage'
 import { NotFoundPage } from '../pages/Pages'
+import { LegalPage } from '../features/legal/LegalPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
@@ -17,6 +18,8 @@ const router = createBrowserRouter([
   { path: '/register', element: <RegisterPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
+  { path: '/privacy', element: <LegalPage doc="privacy" /> },
+  { path: '/terms', element: <LegalPage doc="terms" /> },
   {
     element: <AppLayout />,
     children: [
