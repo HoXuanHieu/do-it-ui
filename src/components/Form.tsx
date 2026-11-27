@@ -24,9 +24,9 @@ export function PasswordInput(props: Omit<ComponentProps<'input'>, 'type'>) {
   )
 }
 
-export function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: ReactNode }) {
+export function Field({ label, error, hint, className, children }: { label: string; error?: string; hint?: string; className?: string; children: ReactNode }) {
   return (
-    <label className="field">
+    <label className={className ? `field ${className}` : 'field'}>
       <span>{label}</span>
       {children}
       {hint && !error && <small className="muted">{hint}</small>}

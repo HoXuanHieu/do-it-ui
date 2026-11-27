@@ -1,13 +1,15 @@
 import { t, type Key } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Field } from '../../components/Form'
+import { DateInput } from '../../components/DateInput'
 import { applyServerErrors } from '../../lib/forms'
 import { profileApi, type Gender, type ProfileDto } from './api'
 import { useAuth } from '../auth/AuthContext'
 import { useAvatarUrl, useProfile, useSetProfile } from './queries'
+import { Select } from '../../components/Select'
 
 const GENDERS: { value: Gender; label: Key }[] = [
   { value: 'Male', label: 'Nam' },
@@ -117,7 +119,7 @@ function ProfileForm({ profile }: { profile: ProfileDto }) {
   const setProfile = useSetProfile()
   const { reloadUser } = useAuth()
   const [status, setStatus] = useState('')
-  const { register, handleSubmit, setError, formState } = useForm<Form>({
+  const { register, handleSubmit, setError, control, formState } = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: {
       fullName: profile.fullName ?? '',
@@ -149,17 +151,17 @@ function ProfileForm({ profile }: { profile: ProfileDto }) {
           <input autoComplete="name" {...register('fullName')} />
         </Field>
         <Field label={t('Ngày sinh')} error={formState.errors.dateOfBirth?.message}>
-          <input type="date" min="1900-01-01" max={todayIso()} {...register('dateOfBirth')} />
+          <Controller control={control} name="dateOfBirth" render={({ field }) => <DateInput optional min="1900-01-01" max={todayIso()} value={field.value} onChange={field.onChange} />} />
         </Field>
         <Field label={t('Giới tính')} error={formState.errors.gender?.message}>
-          <select {...register('gender')}>
+          <Select {...register('gender')}>
             <option value="">{t('— Chưa chọn —')}</option>
             {GENDERS.map((g) => (
               <option key={g.value} value={g.value}>
                 {t(g.label)}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         {status && <p className="form-error" role="alert">{status}</p>}
         <div className="form-actions">

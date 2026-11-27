@@ -2,6 +2,7 @@ import { t, type Key } from '../../../i18n'
 import { Field } from '../../../components/Form'
 import type { Theme } from '../api'
 import { PreferencesCard } from './PreferencesCard'
+import { Select } from '../../../components/Select'
 
 const THEME_LABEL: Record<Theme, Key> = { System: 'Theo hệ thống', Light: 'Sáng', Dark: 'Tối' }
 const LANGUAGE_LABEL: Record<string, string> = { vi: 'Tiếng Việt', en: 'English' }
@@ -18,31 +19,31 @@ export function AppearanceSettings() {
       {({ register, formState: { errors } }, options) => (
         <>
           <Field label={t('Chủ đề')} error={errors.theme?.message}>
-            <select {...register('theme')}>
+            <Select {...register('theme')}>
               {options.themes.map((th) => (
                 <option key={th} value={th}>
                   {t(THEME_LABEL[th])}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field label={t('Ngôn ngữ')} error={errors.language?.message}>
-            <select {...register('language')}>
+            <Select {...register('language')}>
               {options.languages.map((l) => (
                 <option key={l} value={l}>
                   {LANGUAGE_LABEL[l] ?? l}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field label={t('Định dạng ngày')} error={errors.dateFormat?.message}>
-            <select {...register('dateFormat')}>
+            <Select {...register('dateFormat')}>
               {options.dateFormats.map((f) => (
                 <option key={f} value={f}>
                   {DATE_FORMAT_LABEL[f] ?? f} ({f})
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
         </>
       )}

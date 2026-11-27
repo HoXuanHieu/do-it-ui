@@ -2,11 +2,13 @@ import { t, tx } from '../../i18n'
 import { useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
+import { DateInput } from '../../components/DateInput'
 import { addDays, DAY_MS, parseDateKey, toDateKey, weekdayName } from '../../lib/dates'
 import { applyServerErrors } from '../../lib/forms'
 import type { FoodEntryDto, FoodEntryInput, HealthProfileDto, MealType } from './api'
 import { suggestMenu } from './catalog'
 import { MEALS, num, parseNum, useDishes, useFoods, useRemoveFood, useSaveFood } from './queries'
+import { Select } from '../../components/Select'
 
 const sum = (list: FoodEntryDto[], f: (e: FoodEntryDto) => number | null) => list.reduce((s, e) => s + (f(e) ?? 0), 0)
 
@@ -59,7 +61,7 @@ export function NutritionTab({ p }: { p: HealthProfileDto }) {
     <div className="stack-lg">
       <div className="row">
         <button className="btn-ghost" onClick={() => setDay(toDateKey(addDays(date, -1)))} aria-label={t('Ngày trước')}>‹</button>
-        <input type="date" value={day} onChange={(e) => e.target.value && setDay(e.target.value)} aria-label={t('Ngày')} />
+        <DateInput value={day} onChange={setDay} aria-label={t('Ngày')} />
         <button className="btn-ghost" onClick={() => setDay(toDateKey(addDays(date, 1)))} aria-label={t('Ngày sau')}>›</button>
         <button className="btn-link" onClick={() => setDay(toDateKey(new Date()))}>{t('Hôm nay')}</button>
       </div>
@@ -230,9 +232,9 @@ function FoodForm({ state, day, profileId, onClose }: {
         <datalist id="dish-list">{dishes.map((d) => <option key={d.id} value={d.name}>{d.category}</option>)}</datalist>
       </Field>
       <Field label={t('Bữa')}>
-        <select value={v.meal} onChange={set('meal')}>
+        <Select value={v.meal} onChange={set('meal')}>
           {MEALS.map((m) => <option key={m.value} value={m.value}>{t(m.label)}</option>)}
-        </select>
+        </Select>
       </Field>
       {v.name.trim() && (
         <p className="muted span-all">

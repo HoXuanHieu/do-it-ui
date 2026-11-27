@@ -2,6 +2,8 @@ import { locale, t, tx } from '../../i18n'
 import { useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
+import { DateInput } from '../../components/DateInput'
+import { TimeInput } from '../../components/TimeInput'
 import { addDays, DAY_MS, parseDateKey, startOfWeek, toDateKey, weekdayName } from '../../lib/dates'
 import { applyServerErrors } from '../../lib/forms'
 import type { HealthProfileDto, WorkoutDto, WorkoutInput } from './api'
@@ -189,8 +191,8 @@ function WorkoutForm({ state, profileId, onClose }: { state: { workout?: Workout
   return (
     <form className="form-grid" onSubmit={(e) => void submit(e)} noValidate>
       <Field label={t('Tên buổi tập')}><input autoFocus maxLength={200} value={v.name} onChange={set('name')} placeholder={t('VD: Chạy bộ công viên')} /></Field>
-      <Field label={t('Ngày')}><input type="date" value={v.date} onChange={set('date')} /></Field>
-      <Field label={t('Giờ')} hint={t('Không bắt buộc')}><input type="time" value={v.time} onChange={set('time')} /></Field>
+      <Field label={t('Ngày')}><DateInput value={v.date} onChange={(date) => setV({ ...v, date })} /></Field>
+      <Field label={t('Giờ')} hint={t('Không bắt buộc')}><TimeInput optional value={v.time} onChange={(time) => setV({ ...v, time })} /></Field>
       <Field label={t('Thời lượng (phút)')}><input inputMode="numeric" value={v.duration} onChange={set('duration')} /></Field>
       <div className="field span-all">
         <span>{t('Bài tập (mỗi dòng một bài, VD: Squat 3 × 12 × 20 kg)')}</span>

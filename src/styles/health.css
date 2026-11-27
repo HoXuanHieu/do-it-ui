@@ -102,17 +102,23 @@
 
 .med-card { display: grid; gap: 0.75rem; }
 .med-card h2 { margin: 0; }
-.med-form { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.med-form input:first-child { flex: 1 1 12rem; }
-.med-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
-.med-list li { display: flex; align-items: center; gap: 0.5rem; }
-.med-list li .icon-btn { margin-left: auto; }
-
-/* /health: profiles 70% | medication reminders 30%, stacked on narrow screens */
-.health-split { display: grid; gap: 1rem; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: start; }
+.med-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 0.75rem; }
+.med-tile { display: grid; gap: 0.4rem; align-content: start; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+.med-tile.ended { border-style: dashed; }
+.med-tile p { margin: 0; }
+.med-name { font-size: 1.05rem; overflow-wrap: anywhere; }
+.med-stats { font-size: 0.9rem; }
+.med-stats .danger { color: var(--danger); }
+.med-ended { padding-top: 0.4rem; border-top: 1px solid var(--border); }
+.med-doses { display: grid; gap: 0.4rem; }
+.med-tile .med-doses { display: flex; flex-direction: column; max-height: calc(3 * 2.6rem + 2 * 0.4rem); overflow-y: auto; padding-right: 2px; }
+.med-tile .med-dose-row { flex-wrap: nowrap; min-height: 2.6rem; box-sizing: border-box; }
+.med-times { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.med-dose-row { display: flex; flex-wrap: wrap; flex-shrink: 0; align-items: center; gap: 0.35rem 0.9rem; padding: 0.35rem 0.6rem; border: 1px solid var(--border); border-radius: 8px; font-variant-numeric: tabular-nums; }
+.med-dose-row > strong { min-width: 3rem; }
+.med-dose-row.taken { border-color: var(--primary); }
+.med-dose-row.taken > strong { color: var(--primary); text-decoration: line-through; }
+.med-dose-row.missed { border-color: var(--danger); }
+.med-dose-row.missed > strong { color: var(--danger); }
+.med-dose-name { flex: 1 1 100%; order: -1; }
 .health-main { display: grid; gap: 1rem; align-content: start; }
-.health-side { position: sticky; top: 1rem; }
-@media (max-width: 900px) {
-  .health-split { grid-template-columns: 1fr; }
-  .health-side { position: static; }
-}

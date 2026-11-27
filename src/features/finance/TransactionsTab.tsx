@@ -7,6 +7,7 @@ import { usePreferences } from '../account/queries'
 import { MonthSwitcher } from './components'
 import { monthRange, useCategories, useSummary, useTransactions } from './queries'
 import { TransactionDialog, type TransactionDialogMode } from './TransactionDialog'
+import { Select } from '../../components/Select'
 
 const PAGE_SIZE = 30
 
@@ -85,17 +86,17 @@ export function TransactionsTab({ month, jarMode, onMonthChange }: { month: stri
       <div className="row filters">
         <input type="search" className="input grow" placeholder={t('Tìm mô tả, ghi chú, danh mục…')} value={search}
           onChange={(e) => setSearch(e.target.value)} aria-label={t('Tìm giao dịch')} />
-        <select className="input" value={type} onChange={(e) => { setType(e.target.value as TransactionType | ''); setCategoryId('') }} aria-label={t('Loại')}>
+        <Select className="input" value={type} onChange={(e) => { setType(e.target.value as TransactionType | ''); setCategoryId('') }} aria-label={t('Loại')}>
           <option value="">{t('Thu & chi')}</option>
           <option value="Income">{t('Chỉ khoản thu')}</option>
           <option value="Expense">{t('Chỉ khoản chi')}</option>
-        </select>
-        <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} aria-label={t('Danh mục')}>
+        </Select>
+        <Select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} aria-label={t('Danh mục')}>
           <option value="">{t('Tất cả danh mục')}</option>
           {categories.filter((c) => !type || c.type === type).map((c) => (
             <option key={c.id} value={c.id}>{tx(c.name)}{c.isArchived ? ` (${t('đã lưu trữ')})` : ''}</option>
           ))}
-        </select>
+        </Select>
         <input className="input amount-filter" inputMode="decimal" placeholder={t('Từ số tiền')} value={minRaw}
           onChange={(e) => setMinRaw(formatAmountTyping(e.target.value, currency))} aria-label={t('Số tiền tối thiểu')} />
         <input className="input amount-filter" inputMode="decimal" placeholder={t('Đến số tiền')} value={maxRaw}
