@@ -3,6 +3,7 @@ import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { NavIcon, type NavIconName } from '../components/NavIcon'
 import { useAvatarUrl, useLanguageSync, useProfile, useThemeSync } from '../features/account/queries'
 import { useAuth } from '../features/auth/AuthContext'
+import { LegalLinks } from '../features/legal/LegalPage'
 import { MedicationReminderPopup } from '../features/health/MedicationReminder'
 import { NotificationsNavLink } from '../features/notifications/NotificationsNavLink'
 
@@ -60,6 +61,7 @@ function Shell() {
           <button className="btn-ghost" onClick={() => void logout()}>
             {t('Đăng xuất')}
           </button>
+          <LegalLinks />
         </div>
       </aside>
       <main className="content">

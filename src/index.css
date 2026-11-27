@@ -103,6 +103,13 @@ form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
   border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem;
 }
 .auth-card h1 { margin-top: 1rem; }
+.small { font-size: 0.85rem; }
+.legal-links { font-size: 0.8rem; text-align: center; margin-top: 1.25rem; }
+.sidebar-footer .legal-links { margin-top: 0; text-align: left; }
+.legal-page { min-height: 100vh; padding: 2rem 1rem; }
+.legal-card { max-width: 760px; margin: 0 auto; line-height: 1.6; }
+.legal-card h2 { font-size: 1.05rem; margin: 1.5rem 0 0.5rem; }
+.legal-card ul { padding-left: 1.25rem; }
 
 /* Shell */
 .shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; }
@@ -120,6 +127,8 @@ form { display: grid; gap: 0.9rem; margin: 1.5rem 0 1rem; }
 .content { padding: 2rem; min-width: 0; }
 .page-header { margin-bottom: 1.5rem; }
 .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+/* Dashboard cards hold label/amount pairs; 240px squeezed the labels into 3 lines. */
+.dash-grid { grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); }
 .card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 1.25rem; box-shadow: var(--shadow);
