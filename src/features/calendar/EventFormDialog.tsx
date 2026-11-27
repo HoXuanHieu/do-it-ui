@@ -1,15 +1,18 @@
 import { t, tx, type Key } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
+import { DateInput } from '../../components/DateInput'
+import { TimeInput } from '../../components/TimeInput'
 import type { EventCategory, EventDetailDto, EventInput, EventStatus } from './api'
 import { addDays, combine, parseDateKey, toDateKey, toTimeValue } from '../../lib/dates'
 import { applyServerErrors } from '../../lib/forms'
 import { CATEGORIES, MAX_REMINDERS, REMINDERS, STATUSES } from './meta'
 import { useCreateEvent, useUpdateEvent } from './queries'
+import { Select } from '../../components/Select'
 
 const schema = z
   .object({
@@ -167,46 +170,43 @@ function EventForm({ mode, onClose, onSaved }: { mode: EventFormMode; onClose: (
 
       <Field label={t('Bắt đầu')} error={formState.errors.startDate?.message ?? formState.errors.startTime?.message}>
         <div className="row-tight">
-          <input
-            type="date"
-            {...register('startDate', {
-              onChange: (e) => {
-                // keep the end date from falling before the new start date
-                setValue('endDate', e.target.value)
-              },
-            })}
-          />
-          {!isAllDay && <input type="time" step={300} {...register('startTime')} />}
+          <Controller control={control} name="startDate" render={({ field }) => (
+            <DateInput value={field.value} onChange={(d) => {
+              field.onChange(d)
+              setValue('endDate', d) // keep the end date from falling before the new start date
+            }} />
+          )} />
+          {!isAllDay && <Controller control={control} name="startTime" render={({ field }) => <TimeInput aria-label={t('Giờ bắt đầu')} value={field.value} onChange={field.onChange} />} />}
         </div>
       </Field>
       <Field label={t('Kết thúc')} error={formState.errors.endDate?.message ?? formState.errors.endTime?.message}>
         <div className="row-tight">
-          <input type="date" min={startDate} {...register('endDate')} />
-          {!isAllDay && <input type="time" step={300} {...register('endTime')} />}
+          <Controller control={control} name="endDate" render={({ field }) => <DateInput min={startDate} value={field.value} onChange={field.onChange} />} />
+          {!isAllDay && <Controller control={control} name="endTime" render={({ field }) => <TimeInput aria-label={t('Giờ kết thúc')} value={field.value} onChange={field.onChange} />} />}
         </div>
       </Field>
 
       <Field label={t('Phân loại')} error={formState.errors.category?.message}>
-        <select {...register('category')}>
+        <Select {...register('category')}>
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
               {t(c.label)}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label={t('Địa điểm')} error={formState.errors.location?.message}>
         <input maxLength={200} {...register('location')} />
       </Field>
       {mode.kind === 'edit' && (
         <Field label={t('Trạng thái')} error={formState.errors.status?.message}>
-          <select {...register('status')}>
+          <Select {...register('status')}>
             {STATUSES.map((s) => (
               <option key={s.value} value={s.value}>
                 {t(s.label)}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       )}
 

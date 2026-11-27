@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ConfirmDialog } from '../../components/Dialog'
 import { Field } from '../../components/Form'
+import { DateInput } from '../../components/DateInput'
 import { DAY_MS, formatDate, parseDateKey, startOfDay, toDateKey } from '../../lib/dates'
 import { applyServerErrors } from '../../lib/forms'
 import { usePreferences } from '../account/queries'
@@ -370,7 +371,7 @@ function MeasurementForm({ p }: { p: HealthProfileDto }) {
     <section className="card">
       <h2>{t('Ghi chỉ số mới')}</h2>
       <form className="measure-form" onSubmit={submit} noValidate>
-        <Field label={t('Ngày đo')}><input type="date" value={v.date} onChange={set('date')} /></Field>
+        <Field label={t('Ngày đo')}><DateInput value={v.date} onChange={(date) => setV({ ...v, date })} /></Field>
         <Field label={t('Cân nặng (kg)')}><input inputMode="decimal" value={v.weight} onChange={set('weight')} placeholder={num(p.weightKg)} /></Field>
         <Field label={t('Chiều cao (cm)')}><input inputMode="decimal" value={v.height} onChange={set('height')} placeholder={num(p.heightCm)} /></Field>
         <Field label={t('Mỡ cơ thể (%)')}><input inputMode="decimal" value={v.fat} onChange={set('fat')} /></Field>

@@ -8,6 +8,7 @@ import { applyServerErrors, PASSWORD_HINT } from '../../../lib/forms'
 import { useAuth } from '../../auth/AuthContext'
 import { changePasswordSchema, type ChangePasswordForm } from '../../auth/schemas'
 import { PreferencesCard } from './PreferencesCard'
+import { Select } from '../../../components/Select'
 
 /** Settings › Tài khoản: region, notifications, password (FR-SH-004 + FR-AUTH-005). */
 export function AccountSettings() {
@@ -18,13 +19,13 @@ export function AccountSettings() {
           <>
             <TimeZoneField current={prefs.timeZone} error={errors.timeZone?.message} {...register('timeZone')} />
             <Field label={t('Tiền tệ')} error={errors.currency?.message}>
-              <select {...register('currency')}>
+              <Select {...register('currency')}>
                 {options.currencies.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
             <fieldset className="fieldset span-all">
               <legend>{t('Thông báo')}</legend>
@@ -53,13 +54,13 @@ function TimeZoneField({ current, error, ...select }: { current: string; error?:
 
   return (
     <Field label={t('Múi giờ')} error={error} hint={browserZone !== current ? t('Trình duyệt đang dùng {zone}', { zone: browserZone }) : undefined}>
-      <select {...select}>
+      <Select {...select}>
         {zones.map((z) => (
           <option key={z} value={z}>
             {z}
           </option>
         ))}
-      </select>
+      </Select>
     </Field>
   )
 }

@@ -1,10 +1,12 @@
 import { t, tx } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useFieldArray, useForm, useWatch } from 'react-hook-form'
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
+import { DateInput } from '../../components/DateInput'
+import { TimeInput } from '../../components/TimeInput'
 import { addDays, parseDateKey, startOfWeek, toDateKey } from '../../lib/dates'
 import { applyServerErrors } from '../../lib/forms'
 import type { GoalDto, GoalPeriod } from './api'
@@ -153,10 +155,10 @@ function GoalForm({ goal, onClose }: { goal: GoalDto | null; onClose: () => void
       </fieldset>
 
       <Field label={t('Bắt đầu')} error={errors.startDate?.message}>
-        <input type="date" {...register('startDate')} />
+        <Controller control={control} name="startDate" render={({ field }) => <DateInput value={field.value} onChange={field.onChange} />} />
       </Field>
       <Field label={t('Hạn hoàn thành')} error={errors.dueDate?.message}>
-        <input type="date" min={startDate} {...register('dueDate')} />
+        <Controller control={control} name="dueDate" render={({ field }) => <DateInput min={startDate} value={field.value} onChange={field.onChange} />} />
       </Field>
 
       <div className="field span-all">
@@ -181,7 +183,7 @@ function GoalForm({ goal, onClose }: { goal: GoalDto | null; onClose: () => void
                 <input aria-label={t('Chặng {n}', { n: i + 1 })} maxLength={200} {...register(`steps.${i}.title`)} />
                 {errors.steps?.[i]?.title && <small className="field-error">{tx(errors.steps[i].title.message ?? '')}</small>}
               </div>
-              <input type="date" aria-label={t('Hạn của chặng')} title={t('Hạn của chặng')} {...register(`steps.${i}.dueDate`)} />
+              <Controller control={control} name={`steps.${i}.dueDate`} render={({ field }) => <DateInput optional aria-label={t('Hạn của chặng')} value={field.value ?? ''} onChange={field.onChange} />} />
               <button type="button" className="icon-btn" aria-label={t('Lên')} disabled={i === 0} onClick={() => steps.move(i, i - 1)}>↑</button>
               <button type="button" className="icon-btn" aria-label={t('Xuống')} disabled={i === steps.fields.length - 1} onClick={() => steps.move(i, i + 1)}>↓</button>
               <button type="button" className="icon-btn" aria-label={t('Xóa')} onClick={() => steps.remove(i)}>×</button>
@@ -216,7 +218,7 @@ function GoalForm({ goal, onClose }: { goal: GoalDto | null; onClose: () => void
             <input type="checkbox" {...register('remind')} />
             {t('Nhắc tôi mỗi ngày lúc')}
           </label>
-          <input type="time" className="input" disabled={!remind} aria-label={t('Giờ nhắc')} {...register('reminderTime')} />
+          <Controller control={control} name="reminderTime" render={({ field }) => <TimeInput disabled={!remind} aria-label={t('Giờ nhắc')} value={field.value} onChange={field.onChange} />} />
         </div>
         {errors.reminderTime && <small className="field-error">{tx(errors.reminderTime.message ?? '')}</small>}
       </fieldset>

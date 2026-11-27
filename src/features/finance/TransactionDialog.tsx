@@ -1,16 +1,18 @@
 import { t, tx } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { ConfirmDialog, Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
+import { DateInput } from '../../components/DateInput'
 import { toDateKey } from '../../lib/dates'
 import { JARS, type CategoryDto, type Jar, type TransactionDto, type TransactionType } from './api'
 import { applyServerErrors } from '../../lib/forms'
 import { formatAmountInput, parseAmount } from '../../lib/money'
 import { AmountInput } from './components'
 import { useCategories, useDeleteTransaction, useSaveTransaction } from './queries'
+import { Select } from '../../components/Select'
 
 export type TransactionDialogMode =
   | { kind: 'create'; type: TransactionType; date?: string }
@@ -147,11 +149,11 @@ function TransactionForm({ mode, currency, jarMode, onClose }: { mode: Transacti
         <AmountInput currency={currency} autoFocus placeholder="0" {...register('amount')} />
       </Field>
       <Field label={t('Ngày')} error={formState.errors.date?.message}>
-        <input type="date" {...register('date')} />
+        <Controller control={control} name="date" render={({ field }) => <DateInput value={field.value} onChange={field.onChange} />} />
       </Field>
 
       <Field label={t('Danh mục')} error={formState.errors.categoryId?.message}>
-        <select {...register('categoryId')}>
+        <Select {...register('categoryId')}>
           <option value="">{t('— Chọn danh mục —')}</option>
           {options.map((c) => (
             <option key={c.id} value={c.id}>
@@ -159,7 +161,7 @@ function TransactionForm({ mode, currency, jarMode, onClose }: { mode: Transacti
               {c.isArchived ? ` (${t('đã lưu trữ')})` : ''}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label={t('Mô tả')} error={formState.errors.description?.message}>
         <input maxLength={500} placeholder={t('VD: Ăn trưa, Grab…')} {...register('description')} />
@@ -167,12 +169,12 @@ function TransactionForm({ mode, currency, jarMode, onClose }: { mode: Transacti
 
       {jarMode && type === 'Expense' && (
         <Field label={t('Hũ')} error={formState.errors.jar?.message}>
-          <select {...register('jar')}>
+          <Select {...register('jar')}>
             <option value="">{t('— Chọn hũ —')}</option>
             {Object.entries(JARS).map(([value, j]) => (
               <option key={value} value={value}>{t(j.label)}</option>
             ))}
-          </select>
+          </Select>
         </Field>
       )}
 

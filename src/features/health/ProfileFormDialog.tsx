@@ -1,13 +1,15 @@
 import { t, tx } from '../../i18n'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Modal } from '../../components/Dialog'
 import { Field } from '../../components/Form'
+import { DateInput } from '../../components/DateInput'
 import { applyServerErrors } from '../../lib/forms'
 import type { HealthCondition, HealthProfileDto, HealthProfileInput } from './api'
 import { ACTIVITY, CONDITIONS, GOALS, parseNum, SEXES, useCreateProfile, useUpdateProfile } from './queries'
+import { Select } from '../../components/Select'
 
 const number = (min: number, max: number, required: boolean) =>
   z.string().refine((s) => {
@@ -31,6 +33,7 @@ const schema = z.object({
 })
 type FormValues = z.infer<typeof schema>
 
+const todayKey = () => new Date().toLocaleDateString('sv') // YYYY-MM-DD, local
 const str = (n: number | null) => (n == null ? '' : String(n))
 
 function toInput(v: FormValues): HealthProfileInput {
@@ -72,7 +75,7 @@ function ProfileForm({ profile, onClose, onSaved }: { profile?: HealthProfileDto
   const create = useCreateProfile()
   const update = useUpdateProfile()
   const [formError, setFormError] = useState('')
-  const { register, handleSubmit, setError, formState } = useForm<FormValues>({
+  const { register, handleSubmit, setError, control, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: profile
       ? {
@@ -114,17 +117,17 @@ function ProfileForm({ profile, onClose, onSaved }: { profile?: HealthProfileDto
         <input autoFocus maxLength={100} placeholder={t('VD: Tôi, Bố, Mẹ…')} {...register('name')} />
       </Field>
       <Field label={t('Ngày sinh')} error={e.birthDate?.message}>
-        <input type="date" {...register('birthDate')} />
+        <Controller control={control} name="birthDate" render={({ field }) => <DateInput min="1900-01-01" max={todayKey()} value={field.value} onChange={field.onChange} />} />
       </Field>
       <Field label={t('Giới tính')}>
-        <select {...register('sex')}>
+        <Select {...register('sex')}>
           {SEXES.map((s) => <option key={s.value} value={s.value}>{t(s.label)}</option>)}
-        </select>
+        </Select>
       </Field>
       <Field label={t('Mục tiêu')}>
-        <select {...register('goal')}>
+        <Select {...register('goal')}>
           {GOALS.map((g) => <option key={g.value} value={g.value}>{g.icon} {t(g.label)}</option>)}
-        </select>
+        </Select>
       </Field>
       <Field label={t('Chiều cao (cm)')} error={e.heightCm?.message}>
         <input inputMode="decimal" placeholder="170" {...register('heightCm')} />
@@ -135,10 +138,10 @@ function ProfileForm({ profile, onClose, onSaved }: { profile?: HealthProfileDto
       <Field label={t('Cân nặng mục tiêu (kg)')} error={e.targetWeightKg?.message} hint={t('Không bắt buộc')}>
         <input inputMode="decimal" {...register('targetWeightKg')} />
       </Field>
-      <Field label={t('Mức độ vận động')}>
-        <select {...register('activityLevel')}>
+      <Field label={t('Mức độ vận động')} className="span-all">
+        <Select {...register('activityLevel')}>
           {ACTIVITY.map((a) => <option key={a.value} value={a.value}>{t(a.label)} — {t(a.hint)}</option>)}
-        </select>
+        </Select>
       </Field>
 
       <fieldset className="fieldset span-all">

@@ -9,6 +9,7 @@ import { EventDetailDialog } from './EventDetailDialog'
 import { EventFormDialog, type EventFormMode } from './EventFormDialog'
 import { CATEGORIES, STATUSES } from './meta'
 import { useEventDetail, useEventsInRange } from './queries'
+import { Select } from '../../components/Select'
 
 const VIEWS: { value: CalendarView; label: Key }[] = [
   { value: 'month', label: 'Tháng' },
@@ -171,22 +172,22 @@ export function CalendarPage() {
           onChange={(e) => setSearch(e.target.value)}
           aria-label={t('Tìm kiếm sự kiện')}
         />
-        <select className="input" value={category} onChange={(e) => setCategory(e.target.value as EventCategory | '')} aria-label={t('Phân loại')}>
+        <Select className="input" value={category} onChange={(e) => setCategory(e.target.value as EventCategory | '')} aria-label={t('Phân loại')}>
           <option value="">{t('Tất cả phân loại')}</option>
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
               {t(c.label)}
             </option>
           ))}
-        </select>
-        <select className="input" value={status} onChange={(e) => setStatus(e.target.value as EventStatus | '')} aria-label={t('Trạng thái')}>
+        </Select>
+        <Select className="input" value={status} onChange={(e) => setStatus(e.target.value as EventStatus | '')} aria-label={t('Trạng thái')}>
           <option value="">{t('Tất cả trạng thái')}</option>
           {STATUSES.map((s) => (
             <option key={s.value} value={s.value}>
               {t(s.label)}
             </option>
           ))}
-        </select>
+        </Select>
         {filtered && (
           <button
             className="btn-link"

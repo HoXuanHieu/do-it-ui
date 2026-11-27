@@ -22,6 +22,7 @@ export function DashboardPage() {
     <>
       <header className="page-header">
         <h1>{user?.fullName ? t('Xin chào, {name}', { name: user.fullName }) : t('Xin chào')}</h1>
+        <p className="slogan">{t('Nghĩ là làm — mỗi ngày một bước tiến.')}</p>
         <p className="muted">{todayLabel}</p>
       </header>
       {/* FR-DASH-001: remaining widgets are wired up as their modules land (Sprint 3–6). */}

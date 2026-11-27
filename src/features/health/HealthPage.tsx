@@ -1,8 +1,8 @@
 import { locale, t } from '../../i18n'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import type { HealthProfileDto } from './api'
-import { MedicationCard } from './MedicationReminder'
+import { MedicationTab } from './MedicationReminder'
 import { ProfileFormDialog } from './ProfileFormDialog'
 import { BMI_LABEL, GOALS, labelOf, num, useHealthProfiles } from './queries'
 
@@ -15,6 +15,8 @@ export function HealthPage() {
   const { data: profiles, isPending, isError } = useHealthProfiles()
   const [creating, setCreating] = useState(false)
   const navigate = useNavigate()
+  const [params, setParams] = useSearchParams()
+  const tab = params.get('tab') === 'meds' ? 'meds' : 'profiles'
 
   return (
     <div className="health-page">
@@ -26,7 +28,18 @@ export function HealthPage() {
         <button className="btn-primary" onClick={() => setCreating(true)}>{t('+ Hồ sơ mới')}</button>
       </header>
 
-      <div className="health-split">
+      <nav className="tabs" role="tablist" aria-label={t('Sức khỏe')}>
+        {([['profiles', t('Hồ sơ')], ['meds', t('Nhắc uống thuốc')]] as const).map(([value, label]) => (
+          <button key={value} role="tab" aria-selected={tab === value} className={tab === value ? 'active' : undefined}
+            onClick={() => setParams(value === 'meds' ? { tab: value } : {})}>
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      {tab === 'meds' ? (
+        <MedicationTab />
+      ) : (
         <div className="health-main">
           {isPending && <p className="muted">{t('Đang tải…')}</p>}
           {isError && <p className="form-error">{t('Không tải được hồ sơ sức khỏe.')}</p>}
@@ -44,10 +57,7 @@ export function HealthPage() {
             {profiles?.map((p) => <ProfileCard key={p.id} p={p} />)}
           </div>
         </div>
-        <aside className="health-side">
-          <MedicationCard />
-        </aside>
-      </div>
+      )}
 
       <Disclaimer />
       <ProfileFormDialog open={creating} onClose={() => setCreating(false)} onSaved={(p) => navigate(`/health/${p.id}`)} />
